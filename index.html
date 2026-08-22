@@ -1,1 +1,418 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Solikonsert</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --ink:#0d0c0a;--parchment:#f5f0e8;--gold:#b8963e;--gold-light:#d4af6a;
+  --gold-dim:rgba(184,150,62,0.13);--surface:#fff;--muted:#7a7570;
+  --border:rgba(0,0,0,0.08);--border-strong:rgba(0,0,0,0.15);
+  --danger:#c0392b;--success:#27ae60;
+  --ci:rgba(59,130,246,0.13);--cv:rgba(34,197,94,0.13);
+  --ti:#1d4ed8;--tv:#15803d;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--parchment);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent;}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);padding:1.5rem;}
+.login-box{background:#1a1916;border:1px solid rgba(184,150,62,0.25);border-radius:20px;padding:2.5rem 2rem;width:100%;max-width:360px;text-align:center;}
+.login-brand{font-family:'Cormorant Garamond',serif;font-size:44px;color:var(--parchment);margin-bottom:4px;}
+.login-sub{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:2.5rem;}
+#pw-input{width:100%;padding:16px;background:rgba(255,255,255,0.06);border:1px solid rgba(184,150,62,0.3);border-radius:12px;font-size:18px;color:var(--parchment);outline:none;text-align:center;letter-spacing:0.1em;margin-bottom:1rem;font-family:'DM Sans',sans-serif;}
+#pw-input::placeholder{color:rgba(245,240,232,0.25);letter-spacing:normal;font-size:15px;}
+#pw-input:focus{border-color:var(--gold);}
+.login-btn{width:100%;padding:16px;background:var(--gold);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.login-error{font-size:13px;color:#e74c3c;margin-top:0.75rem;min-height:20px;}
+#app{display:none;}
+header{background:var(--ink);padding:1.25rem 1.25rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.brand-wrap{display:flex;flex-direction:column;}
+.brand-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);}
+.brand-title{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--parchment);line-height:1;}
+.header-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--gold-light);line-height:1;}
+.stat-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4);}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(245,240,232,0.35);}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(39,174,96,0.4);}70%{box-shadow:0 0 0 6px rgba(39,174,96,0);}100%{box-shadow:0 0 0 0 rgba(39,174,96,0);}}
+
+.searchbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;gap:0.5rem;align-items:center;position:sticky;top:0;z-index:10;}
+.search-wrap{flex:1;position:relative;}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:0.3;pointer-events:none;}
+.search-wrap input{width:100%;padding:11px 11px 11px 36px;border:1px solid var(--border-strong);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:16px;background:var(--parchment);color:var(--ink);outline:none;-webkit-appearance:none;}
+.search-wrap input:focus{border-color:var(--gold);}
+.btn-sm{padding:10px 13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+
+.filter-bar{background:#faf8f4;border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{padding:8px 14px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;user-select:none;}
+.chip.active{background:var(--ink);color:var(--parchment);border-color:var(--ink);}
+.reset-btns{display:flex;gap:6px;flex-wrap:wrap;}
+.btn-reset{padding:8px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;background:#888;color:#fff;border:none;white-space:nowrap;}
+
+.cards{padding:0.75rem 1rem 6rem;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:0.7rem;overflow:hidden;}
+.card.is-invitert{border-left:4px solid rgba(59,130,246,0.5);}
+.card.was-there{background:var(--cv);}
+.card-top{display:flex;align-items:center;gap:10px;padding:13px 14px 6px;}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--gold-dim);border:1px solid rgba(184,150,62,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;color:var(--gold);flex-shrink:0;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-size:17px;font-weight:500;}
+.card-phone{margin-top:3px;}
+.card-phone a{font-size:19px;font-weight:500;color:var(--gold);text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.card-btns{display:flex;gap:4px;flex-shrink:0;}
+.icon-btn{width:36px;height:36px;border-radius:9px;border:none;background:rgba(0,0,0,0.05);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+.card-note{padding:2px 14px 10px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1.4;}
+.card-note.empty-txt{color:#bbb;font-style:italic;}
+.card-note textarea{width:100%;padding:8px 10px;border:1.5px solid var(--gold);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--ink);outline:none;resize:vertical;min-height:60px;}
+.card-checks{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 13px;border-top:1px solid var(--border);}
+.cpill{display:flex;align-items:center;gap:5px;padding:8px 13px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface);font-size:14px;cursor:pointer;user-select:none;}
+.cpill.ci{background:var(--ci);border-color:rgba(59,130,246,0.4);color:var(--ti);}
+.cpill.cv{background:var(--cv);border-color:rgba(34,197,94,0.4);color:var(--tv);}
+.cpill-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;}
+.cpill.ci .cpill-dot,.cpill.cv .cpill-dot{background:currentColor;}
+.cpill-date{font-size:11px;opacity:0.7;}
+
+.empty-state{text-align:center;padding:3.5rem 2rem;color:var(--muted);}
+.empty-icon{font-family:'Cormorant Garamond',serif;font-size:48px;color:rgba(184,150,62,0.25);margin-bottom:0.75rem;}
+.empty-state h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);margin-bottom:0.4rem;}
+.empty-state p{font-size:14px;}
+
+.fab{position:fixed;right:1.25rem;bottom:1.25rem;width:56px;height:56px;border-radius:50%;background:var(--gold);color:#fff;border:none;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;}
+
+.sheet-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:flex-end;justify-content:center;}
+.sheet-bg.open{display:flex;}
+.sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:1.5rem 1.25rem 2.5rem;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;}
+.sheet-handle{width:40px;height:4px;background:var(--border-strong);border-radius:2px;margin:0 auto 1.25rem;}
+.sheet-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;margin-bottom:1.25rem;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.field label{font-size:10px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+.field input,.field textarea{padding:13px 12px;border:1px solid var(--border-strong);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:16px;background:var(--parchment);color:var(--ink);outline:none;-webkit-appearance:none;}
+.field input:focus,.field textarea:focus{border-color:var(--gold);}
+.field textarea{resize:vertical;min-height:70px;}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem;}
+.sheet-btn{padding:14px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;cursor:pointer;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink);text-align:center;}
+.sheet-btn.primary{background:var(--ink);color:var(--parchment);border-color:var(--ink);}
+
+.toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:var(--parchment);padding:12px 20px;border-radius:10px;font-size:14px;z-index:100;transition:transform 0.25s;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* Desktop table */
+.desktop-table{display:none;}
+@media(min-width:860px){
+  .cards{display:none;}
+  .desktop-table{display:block;padding:1rem 2.5rem 3rem;}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border);}
+  thead th{text-align:left;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--border);background:#faf8f4;}
+  tbody td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr.is-invitert td:first-child{box-shadow:inset 4px 0 0 rgba(59,130,246,0.5);}
+  tbody tr.was-there{background:var(--cv);}
+  .name-cell{display:flex;align-items:center;gap:10px;}
+  .phone-link{color:var(--gold);text-decoration:none;font-weight:500;}
+  .muted{color:var(--muted);}
+  .kj{cursor:pointer;max-width:260px;}
+  .cc{text-align:center;}
+  .cb{width:18px;height:18px;cursor:pointer;}
+  .row-acts{display:flex;gap:4px;}
+  .icon-btn-sm{width:28px;height:28px;border-radius:7px;border:none;background:rgba(0,0,0,0.05);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);}
+  .icon-btn-sm.del svg{stroke:#c0392b;}
+  .searchbar,.filter-bar{padding-left:2.5rem;padding-right:2.5rem;}
+  header{padding-left:2.5rem;padding-right:2.5rem;}
+  .fab{right:2.5rem;bottom:2.5rem;}
+}
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">Solikonsert</div>
+    <div class="login-sub">Soli Brug · Smia</div>
+    <input type="password" id="pw-input" placeholder="Passord" onkeydown="if(event.key==='Enter')tryLogin()">
+    <button class="login-btn" onclick="tryLogin()">Logg inn</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="brand-wrap">
+      <div class="brand-label">Soli Brug · Smia</div>
+      <div class="brand-title">Solikonsert</div>
+    </div>
+    <div class="header-meta">
+      <div class="stat-num" id="total-count">0</div>
+      <div class="stat-lbl">Gjester</div>
+      <div class="live-badge"><div class="live-dot"></div>Live</div>
+    </div>
+  </header>
+
+  <div class="searchbar">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="search" placeholder="Søk navn eller telefon…" oninput="render()">
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-chips">
+      <div class="chip active" id="chip-alle" onclick="setFilter('alle')">Alle</div>
+      <div class="chip" id="chip-invitert" onclick="setFilter('invitert')">Invitert sist</div>
+      <div class="chip" id="chip-var" onclick="setFilter('var')">Var der sist</div>
+      <div class="chip" id="chip-ikke" onclick="setFilter('ikke')">Ikke invitert</div>
+    </div>
+    <div class="reset-btns">
+      <button class="btn-reset" onclick="nullstillInvitert()">Nullstill invitert</button>
+      <button class="btn-reset" onclick="nullstillVar()">Nullstill oppmøte</button>
+    </div>
+  </div>
+
+  <div class="cards" id="cards"></div>
+  <div class="empty-state" id="empty-state" style="display:none">
+    <div class="empty-icon">♪</div>
+    <h3>Ingen gjester funnet</h3>
+    <p>Prøv et annet søk, eller legg til en ny gjest.</p>
+  </div>
+
+  <div class="desktop-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Navn</th><th>Etternavn</th><th>Telefon</th><th>Notat</th>
+          <th>Invitert sist</th><th>Var der sist</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <button class="fab" onclick="openAdd()" title="Legg til gjest">+</button>
+</div>
+
+<div class="sheet-bg" id="edit-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-title">Legg til gjest</div>
+    <div class="form-row">
+      <div class="field"><label>Fornavn</label><input id="f-fornavn" placeholder="Fornavn"></div>
+      <div class="field"><label>Etternavn</label><input id="f-etternavn" placeholder="Etternavn"></div>
+    </div>
+    <div class="field"><label>Telefon</label><input id="f-phone" placeholder="9XXXXXXX" inputmode="tel"></div>
+    <div class="field"><label>Notat</label><textarea id="f-notater" placeholder="Valgfritt notat…"></textarea></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeSheet()">Avbryt</button>
+      <button class="sheet-btn primary" onclick="saveGuest()">Lagre</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL='https://epfxrpbzxuwyiqsojlmu.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZnhycGJ6eHV3eWlxc29qbG11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNTI4NTUsImV4cCI6MjA5MTcyODg1NX0.ZvZBoEn_SEA32FvWQK0E0MPMo5PRwoDgiD0fZUKYP_s';
+const ACCESS_PASSWORD='SoliBrug';
+const TABLE='konsert_gjester';
+
+// Denne meldingen sendes ferdig utfylt når du trykker på et telefonnummer.
+// Be Claude endre denne teksten når dere har en ny invitasjon å sende ut.
+const SMS_TEKST='Konsert. Hilsen Ole Dørje.';
+
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let guests=[],editId=null,activeFilter='alle';
+
+function tryLogin(){
+  const pw=document.getElementById('pw-input').value;
+  if(pw===ACCESS_PASSWORD){
+    sessionStorage.setItem('solikonsert-auth','1');
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadGuests();subscribeRealtime();
+  }else{
+    const err=document.getElementById('login-error');
+    err.textContent='Feil passord – prøv igjen.';
+    document.getElementById('pw-input').value='';
+    setTimeout(()=>err.textContent='',3000);
+  }
+}
+if(sessionStorage.getItem('solikonsert-auth')==='1'){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  loadGuests();subscribeRealtime();
+}
+
+async function loadGuests(){
+  const scrollY=window.scrollY;
+  const{data,error}=await sb.from(TABLE).select('*').order('etternavn',{ascending:true});
+  if(!error){guests=data||[];render();window.scrollTo({top:scrollY});}
+}
+function subscribeRealtime(){
+  sb.channel('konsert_all')
+    .on('postgres_changes',{event:'*',schema:'public',table:TABLE},()=>loadGuests())
+    .subscribe();
+}
+
+function setFilter(f){
+  activeFilter=f;
+  ['alle','invitert','var','ikke'].forEach(x=>document.getElementById('chip-'+x).classList.remove('active'));
+  document.getElementById('chip-'+f).classList.add('active');
+  render();
+}
+
+function smsHref(phone){
+  return `sms:${encodeURIComponent(phone)}?&body=${encodeURIComponent(SMS_TEKST)}`;
+}
+
+function render(){
+  const q=(document.getElementById('search').value||'').toLowerCase();
+  let list=guests;
+  if(activeFilter==='invitert')list=list.filter(g=>g.invitert_sist);
+  else if(activeFilter==='var')list=list.filter(g=>g.var_sist);
+  else if(activeFilter==='ikke')list=list.filter(g=>!g.invitert_sist);
+  if(q)list=list.filter(g=>(g.fornavn||'').toLowerCase().includes(q)||(g.etternavn||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q)||(g.notater||'').toLowerCase().includes(q));
+
+  document.getElementById('total-count').textContent=guests.length;
+  const emptyEl=document.getElementById('empty-state');
+  const cardsEl=document.getElementById('cards');
+  if(!list.length){cardsEl.innerHTML='';emptyEl.style.display='block';}
+  else{
+    emptyEl.style.display='none';
+    cardsEl.innerHTML=list.map(g=>{
+      const cls=[g.invitert_sist?'is-invitert':'',g.var_sist?'was-there':''].filter(Boolean).join(' ');
+      return `<div class="card ${cls}" id="card-${g.id}">
+        <div class="card-top">
+          <div class="avatar">${ini(g.fornavn,g.etternavn)}</div>
+          <div class="card-info">
+            <div class="card-name">${esc(g.fornavn||'')} ${esc(g.etternavn||'')}</div>
+            <div class="card-phone">${g.phone?`<a href="${smsHref(g.phone)}">📱 ${esc(g.phone)}</a>`:''}</div>
+          </div>
+          <div class="card-btns">
+            <button class="icon-btn" onclick="startEdit('${g.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="icon-btn" onclick="deleteGuest('${g.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+          </div>
+        </div>
+        <div class="card-note ${g.notater?'':'empty-txt'}" id="nt-${g.id}" onclick="editNote('${g.id}')">${esc(g.notater||'Trykk for å legge inn notat…')}</div>
+        <div class="card-checks">
+          <div class="cpill ${g.invitert_sist?'ci':''}" onclick="toggleFlag('${g.id}','invitert_sist')"><div class="cpill-dot"></div>Invitert sist${g.invitert_sist&&g.invitert_dato?` <span class="cpill-date">(${fmtDate(g.invitert_dato)})</span>`:''}</div>
+          <div class="cpill ${g.var_sist?'cv':''}" onclick="toggleFlag('${g.id}','var_sist')"><div class="cpill-dot"></div>Var der sist</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('tbody').innerHTML=list.map(g=>{
+    const cls=[g.invitert_sist?'is-invitert':'',g.var_sist?'was-there':''].filter(Boolean).join(' ');
+    return `<tr class="${cls}">
+      <td><div class="name-cell"><div class="avatar">${ini(g.fornavn,g.etternavn)}</div>${esc(g.fornavn||'')}</div></td>
+      <td class="muted">${esc(g.etternavn||'—')}</td>
+      <td>${g.phone?`<a class="phone-link" href="${smsHref(g.phone)}">${esc(g.phone)}</a>`:'<span class="muted">—</span>'}</td>
+      <td class="kj" onclick="startEdit('${g.id}')">${esc(g.notater||'—')}</td>
+      <td class="cc"><input type="checkbox" class="cb" ${g.invitert_sist?'checked':''} onchange="toggleFlagDirect('${g.id}','invitert_sist',this.checked)"></td>
+      <td class="cc"><input type="checkbox" class="cb" ${g.var_sist?'checked':''} onchange="toggleFlagDirect('${g.id}','var_sist',this.checked)"></td>
+      <td><div class="row-acts">
+        <button class="icon-btn-sm" onclick="startEdit('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="icon-btn-sm del" onclick="deleteGuest('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function ini(f,e){return((f||' ')[0]+(e||' ')[0]).toUpperCase();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDate(d){if(!d)return'';const p=d.split('-');return p.length===3?`${p[2]}.${p[1]}`:d;}
+
+async function toggleFlag(id,col){
+  const g=guests.find(x=>x.id===id);if(!g)return;
+  const newVal=!g[col];g[col]=newVal;
+  const upd={[col]:newVal};
+  if(col==='invitert_sist')upd.invitert_dato=newVal?new Date().toISOString().slice(0,10):null;
+  if(col==='invitert_sist')g.invitert_dato=upd.invitert_dato;
+  await sb.from(TABLE).update(upd).eq('id',id);
+  render();
+}
+async function toggleFlagDirect(id,col,val){
+  const upd={[col]:val};
+  if(col==='invitert_sist')upd.invitert_dato=val?new Date().toISOString().slice(0,10):null;
+  await sb.from(TABLE).update(upd).eq('id',id);
+  const g=guests.find(x=>x.id===id);if(g){g[col]=val;if(col==='invitert_sist')g.invitert_dato=upd.invitert_dato;}
+}
+
+async function editNote(id){
+  const el=document.getElementById('nt-'+id);if(!el||el.querySelector('textarea'))return;
+  const g=guests.find(x=>x.id===id);const orig=g?g.notater||'':'';
+  el.classList.remove('empty-txt');
+  el.innerHTML=`<textarea>${esc(orig)}</textarea>`;
+  const ta=el.querySelector('textarea');ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  ta.onblur=async()=>{
+    const val=ta.value.trim();
+    if(g)g.notater=val;
+    await sb.from(TABLE).update({notater:val}).eq('id',id);
+    render();
+  };
+}
+
+async function deleteGuest(id){
+  const g=guests.find(x=>x.id===id);
+  if(!confirm(`Slette ${g?g.fornavn+' '+(g.etternavn||''):'denne gjesten'}?`))return;
+  await sb.from(TABLE).delete().eq('id',id);
+  toast('Slettet');await loadGuests();
+}
+
+async function nullstillInvitert(){
+  if(!confirm('Nullstille "Invitert sist" for alle gjester?'))return;
+  await sb.from(TABLE).update({invitert_sist:false,invitert_dato:null}).neq('id','00000000-0000-0000-0000-000000000000');
+  toast('Nullstilt');await loadGuests();
+}
+async function nullstillVar(){
+  if(!confirm('Nullstille "Var der sist" for alle gjester?'))return;
+  await sb.from(TABLE).update({var_sist:false}).neq('id','00000000-0000-0000-0000-000000000000');
+  toast('Nullstilt');await loadGuests();
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('sheet-title').textContent='Legg til gjest';
+  document.getElementById('f-fornavn').value='';
+  document.getElementById('f-etternavn').value='';
+  document.getElementById('f-phone').value='';
+  document.getElementById('f-notater').value='';
+  document.getElementById('edit-sheet').classList.add('open');
+}
+function startEdit(id){
+  const g=guests.find(x=>x.id===id);if(!g)return;
+  editId=id;
+  document.getElementById('sheet-title').textContent='Rediger gjest';
+  document.getElementById('f-fornavn').value=g.fornavn||'';
+  document.getElementById('f-etternavn').value=g.etternavn||'';
+  document.getElementById('f-phone').value=g.phone||'';
+  document.getElementById('f-notater').value=g.notater||'';
+  document.getElementById('edit-sheet').classList.add('open');
+}
+function closeSheet(){document.getElementById('edit-sheet').classList.remove('open');}
+async function saveGuest(){
+  const fornavn=document.getElementById('f-fornavn').value.trim();
+  const etternavn=document.getElementById('f-etternavn').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  const notater=document.getElementById('f-notater').value.trim();
+  if(!fornavn){toast('Fornavn må fylles ut');return;}
+  if(editId){
+    await sb.from(TABLE).update({fornavn,etternavn,phone,notater}).eq('id',editId);
+    toast('Lagret');
+  }else{
+    await sb.from(TABLE).insert({fornavn,etternavn,phone,notater});
+    toast('Gjest lagt til');
+  }
+  closeSheet();await loadGuests();
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+</script>
+</body>
+</html>
