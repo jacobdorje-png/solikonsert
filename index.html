@@ -249,8 +249,15 @@ if(sessionStorage.getItem('solikonsert-auth')==='1'){
 
 async function loadGuests(){
   const scrollY=window.scrollY;
-  const{data,error}=await sb.from(TABLE).select('*').order('etternavn',{ascending:true});
-  if(!error){guests=data||[];render();window.scrollTo({top:scrollY});}
+  const PAGE=1000;
+  let all=[],from=0,keepGoing=true,hadError=false;
+  while(keepGoing){
+    const{data,error}=await sb.from(TABLE).select('*').order('etternavn',{ascending:true}).range(from,from+PAGE-1);
+    if(error){hadError=true;break;}
+    all=all.concat(data||[]);
+    if(!data||data.length<PAGE){keepGoing=false;}else{from+=PAGE;}
+  }
+  if(!hadError){guests=all;render();window.scrollTo({top:scrollY});}
 }
 function subscribeRealtime(){
   sb.channel('konsert_all')
