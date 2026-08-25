@@ -40,7 +40,11 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 2s infinite;}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(39,174,96,0.4);}70%{box-shadow:0 0 0 6px rgba(39,174,96,0);}100%{box-shadow:0 0 0 0 rgba(39,174,96,0);}}
 
-.searchbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;gap:0.5rem;align-items:center;position:sticky;top:0;z-index:10;}
+.main-tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:11;}
+.main-tabs .tab{flex:1;text-align:center;padding:13px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;user-select:none;}
+.main-tabs .tab.active{color:var(--accent-dark);border-bottom-color:var(--accent);}
+
+.searchbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;gap:0.5rem;align-items:center;position:sticky;top:41px;z-index:10;}
 .search-wrap{flex:1;position:relative;}
 .search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:0.3;pointer-events:none;}
 .search-wrap input{width:100%;padding:11px 11px 11px 36px;border:1px solid var(--border-strong);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:16px;background:var(--bg);color:var(--ink);outline:none;-webkit-appearance:none;}
@@ -81,6 +85,17 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .empty-icon{font-family:'Cormorant Garamond',serif;font-size:48px;color:rgba(79,163,172,0.3);margin-bottom:0.75rem;}
 .empty-state h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--ink);margin-bottom:0.4rem;}
 .empty-state p{font-size:14px;}
+
+.konsert-list{padding:1.25rem 1rem 6rem;}
+.konsert-section-title{font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--accent-dark);margin:0 0 0.7rem;}
+.konsert-section-title:not(:first-child){margin-top:1.75rem;}
+.konsert-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:0.7rem;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.konsert-navn{font-size:16px;font-weight:500;}
+.konsert-dato{font-size:13px;color:var(--muted);margin-top:3px;}
+.konsert-empty{color:var(--muted);font-size:14px;padding:0.25rem 0 0.5rem;}
+.attendance-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--border-strong);border-radius:10px;cursor:pointer;margin-bottom:8px;}
+.attendance-row span.an{flex:1;font-size:14px;}
+.attendance-row span.ad{font-size:12px;color:var(--muted);}
 
 .fab{position:fixed;right:1.25rem;bottom:1.25rem;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(47,58,61,0.2);font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;}
 
@@ -125,6 +140,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   .searchbar,.filter-bar{padding-left:2.5rem;padding-right:2.5rem;}
   header{padding-left:2.5rem;padding-right:2.5rem;}
   .fab{right:2.5rem;bottom:2.5rem;}
+  .konsert-list{padding:1.5rem 2.5rem 3rem;max-width:760px;}
 }
 </style>
 </head>
@@ -153,46 +169,58 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
     </div>
   </header>
 
-  <div class="searchbar">
-    <div class="search-wrap">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" id="search" placeholder="Søk navn eller telefon…" oninput="render()">
+  <div class="main-tabs">
+    <div class="tab active" id="tab-gjester" onclick="switchView('gjester')">Gjester</div>
+    <div class="tab" id="tab-konserter" onclick="switchView('konserter')">Konserter</div>
+  </div>
+
+  <div id="view-gjester">
+    <div class="searchbar">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="search" placeholder="Søk navn eller telefon…" oninput="render()">
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-chips">
+        <div class="chip active" id="chip-alle" onclick="setFilter('alle')">Alle</div>
+        <div class="chip" id="chip-invitert" onclick="setFilter('invitert')">Invitert sist</div>
+        <div class="chip" id="chip-var" onclick="setFilter('var')">Var der sist</div>
+        <div class="chip" id="chip-ikke" onclick="setFilter('ikke')">Ikke invitert</div>
+      </div>
+      <div class="reset-btns">
+        <button class="btn-reset" onclick="nullstillInvitert()">Nullstill invitert</button>
+        <button class="btn-reset" onclick="nullstillVar()">Nullstill oppmøte</button>
+      </div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+    <div class="empty-state" id="empty-state" style="display:none">
+      <div class="empty-icon">♪</div>
+      <h3>Ingen gjester funnet</h3>
+      <p>Prøv et annet søk, eller legg til en ny gjest.</p>
+    </div>
+
+    <div class="desktop-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Navn</th><th>Etternavn</th><th>Telefon</th><th>Notat</th>
+            <th>Invitert sist</th><th>Var der sist</th><th>Konserter</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
     </div>
   </div>
 
-  <div class="filter-bar">
-    <div class="filter-chips">
-      <div class="chip active" id="chip-alle" onclick="setFilter('alle')">Alle</div>
-      <div class="chip" id="chip-invitert" onclick="setFilter('invitert')">Invitert sist</div>
-      <div class="chip" id="chip-var" onclick="setFilter('var')">Var der sist</div>
-      <div class="chip" id="chip-ikke" onclick="setFilter('ikke')">Ikke invitert</div>
-    </div>
-    <div class="reset-btns">
-      <button class="btn-reset" onclick="nullstillInvitert()">Nullstill invitert</button>
-      <button class="btn-reset" onclick="nullstillVar()">Nullstill oppmøte</button>
-    </div>
+  <div id="view-konserter" style="display:none">
+    <div class="konsert-list" id="konsert-list"></div>
   </div>
 
-  <div class="cards" id="cards"></div>
-  <div class="empty-state" id="empty-state" style="display:none">
-    <div class="empty-icon">♪</div>
-    <h3>Ingen gjester funnet</h3>
-    <p>Prøv et annet søk, eller legg til en ny gjest.</p>
-  </div>
-
-  <div class="desktop-table">
-    <table>
-      <thead>
-        <tr>
-          <th>Navn</th><th>Etternavn</th><th>Telefon</th><th>Notat</th>
-          <th>Invitert sist</th><th>Var der sist</th><th></th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-
-  <button class="fab" onclick="openAdd()" title="Legg til gjest">+</button>
+  <button class="fab" id="fab-gjester" onclick="openAdd()" title="Legg til gjest">+</button>
+  <button class="fab" id="fab-konsert" onclick="openAddKonsert()" title="Legg til konsert" style="display:none">+</button>
 </div>
 
 <div class="sheet-bg" id="edit-sheet">
@@ -212,6 +240,30 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   </div>
 </div>
 
+<div class="sheet-bg" id="konsert-edit-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="konsert-edit-title">Legg til konsert</div>
+    <div class="field"><label>Navn</label><input id="k-navn" placeholder="F.eks. Vårkonsert 2026"></div>
+    <div class="field"><label>Dato</label><input id="k-dato" type="date"></div>
+    <div class="sheet-actions" id="konsert-edit-actions">
+      <button class="sheet-btn" onclick="closeKonsertEditSheet()">Avbryt</button>
+      <button class="sheet-btn primary" onclick="saveKonsert()">Lagre</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-bg" id="attendance-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="attendance-title">Konserter</div>
+    <div id="attendance-list"></div>
+    <div class="sheet-actions" style="grid-template-columns:1fr;margin-top:0.5rem;">
+      <button class="sheet-btn primary" onclick="closeAttendanceSheet()">Lukk</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -219,6 +271,8 @@ const SUPABASE_URL='https://epfxrpbzxuwyiqsojlmu.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZnhycGJ6eHV3eWlxc29qbG11Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNTI4NTUsImV4cCI6MjA5MTcyODg1NX0.ZvZBoEn_SEA32FvWQK0E0MPMo5PRwoDgiD0fZUKYP_s';
 const ACCESS_PASSWORD='sbk';
 const TABLE='konsert_gjester';
+const KONSERT_TABLE='konsert_arrangementer';
+const DELTAKELSE_TABLE='konsert_deltakelse';
 
 // Denne meldingen sendes ferdig utfylt når du trykker på et telefonnummer.
 // Be Claude endre denne teksten når dere har en ny invitasjon å sende ut.
@@ -226,6 +280,7 @@ const SMS_TEKST='Konsert. Hilsen Ole Dørje.';
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let guests=[],editId=null,activeFilter='alle';
+let concerts=[],attendance=[],currentView='gjester',attendanceGuestId=null,editKonsertId=null;
 
 function tryLogin(){
   const pw=document.getElementById('pw-input').value;
@@ -233,7 +288,7 @@ function tryLogin(){
     sessionStorage.setItem('solikonsert-auth','1');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
-    loadGuests();subscribeRealtime();
+    loadGuests();loadConcerts();loadAttendance();subscribeRealtime();
   }else{
     const err=document.getElementById('login-error');
     err.textContent='Feil passord – prøv igjen.';
@@ -244,7 +299,18 @@ function tryLogin(){
 if(sessionStorage.getItem('solikonsert-auth')==='1'){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
-  loadGuests();subscribeRealtime();
+  loadGuests();loadConcerts();loadAttendance();subscribeRealtime();
+}
+
+function switchView(v){
+  currentView=v;
+  document.getElementById('view-gjester').style.display=v==='gjester'?'':'none';
+  document.getElementById('view-konserter').style.display=v==='konserter'?'':'none';
+  document.getElementById('fab-gjester').style.display=v==='gjester'?'flex':'none';
+  document.getElementById('fab-konsert').style.display=v==='konserter'?'flex':'none';
+  document.getElementById('tab-gjester').classList.toggle('active',v==='gjester');
+  document.getElementById('tab-konserter').classList.toggle('active',v==='konserter');
+  if(v==='konserter')renderKonserter();
 }
 
 async function loadGuests(){
@@ -259,9 +325,28 @@ async function loadGuests(){
   }
   if(!hadError){guests=all;render();window.scrollTo({top:scrollY});}
 }
+async function loadConcerts(){
+  const{data,error}=await sb.from(KONSERT_TABLE).select('*').order('dato',{ascending:false});
+  if(!error){concerts=data||[];if(currentView==='konserter')renderKonserter();}
+}
+async function loadAttendance(){
+  const PAGE=1000;let all=[],from=0,keepGoing=true;
+  while(keepGoing){
+    const{data,error}=await sb.from(DELTAKELSE_TABLE).select('*').range(from,from+PAGE-1);
+    if(error)break;
+    all=all.concat(data||[]);
+    if(!data||data.length<PAGE)keepGoing=false;else from+=PAGE;
+  }
+  attendance=all;
+}
+function attendedIds(gid){return attendance.filter(a=>a.gjest_id===gid).map(a=>a.konsert_id);}
+function attendanceCount(kid){return attendance.filter(a=>a.konsert_id===kid).length;}
+
 function subscribeRealtime(){
   sb.channel('konsert_all')
     .on('postgres_changes',{event:'*',schema:'public',table:TABLE},()=>loadGuests())
+    .on('postgres_changes',{event:'*',schema:'public',table:KONSERT_TABLE},()=>loadConcerts())
+    .on('postgres_changes',{event:'*',schema:'public',table:DELTAKELSE_TABLE},async()=>{await loadAttendance();render();if(currentView==='konserter')renderKonserter();if(document.getElementById('attendance-sheet').classList.contains('open'))renderAttendanceList();})
     .subscribe();
 }
 
@@ -308,6 +393,7 @@ function render(){
         <div class="card-checks">
           <div class="cpill ${g.invitert_sist?'ci':''}" onclick="toggleFlag('${g.id}','invitert_sist')"><div class="cpill-dot"></div>Invitert sist${g.invitert_sist&&g.invitert_dato?` <span class="cpill-date">(${fmtDate(g.invitert_dato)})</span>`:''}</div>
           <div class="cpill ${g.var_sist?'cv':''}" onclick="toggleFlag('${g.id}','var_sist')"><div class="cpill-dot"></div>Var der sist</div>
+          <div class="cpill" onclick="openAttendanceSheet('${g.id}')">🎵 Konserter (${attendedIds(g.id).length})</div>
         </div>
       </div>`;
     }).join('');
@@ -322,6 +408,7 @@ function render(){
       <td class="kj" onclick="startEdit('${g.id}')">${esc(g.notater||'—')}</td>
       <td class="cc"><input type="checkbox" class="cb" ${g.invitert_sist?'checked':''} onchange="toggleFlagDirect('${g.id}','invitert_sist',this.checked)"></td>
       <td class="cc"><input type="checkbox" class="cb" ${g.var_sist?'checked':''} onchange="toggleFlagDirect('${g.id}','var_sist',this.checked)"></td>
+      <td class="cc"><button class="btn-reset" onclick="openAttendanceSheet('${g.id}')">🎵 ${attendedIds(g.id).length}</button></td>
       <td><div class="row-acts">
         <button class="icon-btn-sm" onclick="startEdit('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="icon-btn-sm del" onclick="deleteGuest('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
@@ -332,6 +419,12 @@ function render(){
 function ini(f,e){return((f||' ')[0]+(e||' ')[0]).toUpperCase();}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fmtDate(d){if(!d)return'';const p=d.split('-');return p.length===3?`${p[2]}.${p[1]}`:d;}
+function fmtDateLong(d){
+  if(!d)return'';
+  const months=['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+  const p=d.split('-');if(p.length!==3)return d;
+  return `${parseInt(p[2],10)}. ${months[parseInt(p[1],10)-1]} ${p[0]}`;
+}
 
 async function toggleFlag(id,col){
   const g=guests.find(x=>x.id===id);if(!g)return;
@@ -415,6 +508,106 @@ async function saveGuest(){
     toast('Gjest lagt til');
   }
   closeSheet();await loadGuests();
+}
+
+function openAttendanceSheet(gid){
+  attendanceGuestId=gid;
+  const g=guests.find(x=>x.id===gid);
+  document.getElementById('attendance-title').textContent='Konserter – '+(g?((g.fornavn||'')+' '+(g.etternavn||'')).trim()||'gjest':'gjest');
+  renderAttendanceList();
+  document.getElementById('attendance-sheet').classList.add('open');
+}
+function closeAttendanceSheet(){
+  document.getElementById('attendance-sheet').classList.remove('open');
+  attendanceGuestId=null;
+}
+function renderAttendanceList(){
+  const list=document.getElementById('attendance-list');
+  if(!concerts.length){
+    list.innerHTML='<p class="konsert-empty">Ingen konserter lagt inn ennå. Legg til under fanen «Konserter».</p>';
+    return;
+  }
+  const mine=new Set(attendedIds(attendanceGuestId));
+  list.innerHTML=concerts.map(k=>`
+    <label class="attendance-row">
+      <input type="checkbox" class="cb" ${mine.has(k.id)?'checked':''} onchange="toggleAttendance('${k.id}',this.checked)">
+      <span class="an">${esc(k.navn)}</span>
+      <span class="ad">${k.dato?fmtDate(k.dato):''}</span>
+    </label>`).join('');
+}
+async function toggleAttendance(konsertId,checked){
+  const gid=attendanceGuestId;if(!gid)return;
+  if(checked){
+    await sb.from(DELTAKELSE_TABLE).insert({gjest_id:gid,konsert_id:konsertId});
+    if(!attendance.some(a=>a.gjest_id===gid&&a.konsert_id===konsertId))attendance.push({gjest_id:gid,konsert_id:konsertId});
+  }else{
+    await sb.from(DELTAKELSE_TABLE).delete().eq('gjest_id',gid).eq('konsert_id',konsertId);
+    attendance=attendance.filter(a=>!(a.gjest_id===gid&&a.konsert_id===konsertId));
+  }
+  render();renderAttendanceList();
+}
+
+function renderKonserter(){
+  const wrap=document.getElementById('konsert-list');if(!wrap)return;
+  const todayStr=new Date().toISOString().slice(0,10);
+  const withCounts=concerts.map(k=>({...k,count:attendanceCount(k.id)}));
+  const kommende=withCounts.filter(k=>k.dato&&k.dato>=todayStr).sort((a,b)=>a.dato<b.dato?-1:1);
+  const tidligere=withCounts.filter(k=>!k.dato||k.dato<todayStr).sort((a,b)=>(b.dato||'').localeCompare(a.dato||''));
+  function card(k){
+    return `<div class="konsert-card">
+      <div>
+        <div class="konsert-navn">${esc(k.navn)}</div>
+        <div class="konsert-dato">${k.dato?fmtDateLong(k.dato):'Dato ikke satt'} · ${k.count} gjest${k.count===1?'':'er'}</div>
+      </div>
+      <div class="card-btns">
+        <button class="icon-btn" onclick="startEditKonsert('${k.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="icon-btn" onclick="deleteKonsert('${k.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
+      </div>
+    </div>`;
+  }
+  wrap.innerHTML=`
+    <div class="konsert-section-title">Kommende konserter</div>
+    ${kommende.length?kommende.map(card).join(''):'<p class="konsert-empty">Ingen kommende konserter lagt inn ennå.</p>'}
+    <div class="konsert-section-title">Tidligere konserter</div>
+    ${tidligere.length?tidligere.map(card).join(''):'<p class="konsert-empty">Ingen tidligere konserter lagt inn ennå.</p>'}
+  `;
+}
+
+function openAddKonsert(){
+  editKonsertId=null;
+  document.getElementById('konsert-edit-title').textContent='Legg til konsert';
+  document.getElementById('k-navn').value='';
+  document.getElementById('k-dato').value='';
+  document.getElementById('konsert-edit-sheet').classList.add('open');
+}
+function startEditKonsert(id){
+  const k=concerts.find(x=>x.id===id);if(!k)return;
+  editKonsertId=id;
+  document.getElementById('konsert-edit-title').textContent='Rediger konsert';
+  document.getElementById('k-navn').value=k.navn||'';
+  document.getElementById('k-dato').value=k.dato||'';
+  document.getElementById('konsert-edit-sheet').classList.add('open');
+}
+function closeKonsertEditSheet(){document.getElementById('konsert-edit-sheet').classList.remove('open');}
+async function saveKonsert(){
+  const navn=document.getElementById('k-navn').value.trim();
+  const dato=document.getElementById('k-dato').value||null;
+  if(!navn){toast('Navn må fylles ut');return;}
+  if(editKonsertId){
+    await sb.from(KONSERT_TABLE).update({navn,dato}).eq('id',editKonsertId);
+    toast('Lagret');
+  }else{
+    await sb.from(KONSERT_TABLE).insert({navn,dato});
+    toast('Konsert lagt til');
+  }
+  closeKonsertEditSheet();await loadConcerts();renderKonserter();
+}
+async function deleteKonsert(id){
+  const k=concerts.find(x=>x.id===id);
+  if(!confirm(`Slette konserten "${k?k.navn:''}"? Dette fjerner også oppmøteregistreringen for denne konserten.`))return;
+  await sb.from(KONSERT_TABLE).delete().eq('id',id);
+  toast('Slettet');
+  await loadConcerts();await loadAttendance();render();renderKonserter();
 }
 
 function toast(msg){
