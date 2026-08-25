@@ -432,13 +432,15 @@ async function toggleFlag(id,col){
   const upd={[col]:newVal};
   if(col==='invitert_sist')upd.invitert_dato=newVal?new Date().toISOString().slice(0,10):null;
   if(col==='invitert_sist')g.invitert_dato=upd.invitert_dato;
-  await sb.from(TABLE).update(upd).eq('id',id);
+  const{error}=await sb.from(TABLE).update(upd).eq('id',id);
+  if(error){toast('Kunne ikke lagre: '+error.message);g[col]=!newVal;}
   render();
 }
 async function toggleFlagDirect(id,col,val){
   const upd={[col]:val};
   if(col==='invitert_sist')upd.invitert_dato=val?new Date().toISOString().slice(0,10):null;
-  await sb.from(TABLE).update(upd).eq('id',id);
+  const{error}=await sb.from(TABLE).update(upd).eq('id',id);
+  if(error){toast('Kunne ikke lagre: '+error.message);render();return;}
   const g=guests.find(x=>x.id===id);if(g){g[col]=val;if(col==='invitert_sist')g.invitert_dato=upd.invitert_dato;}
 }
 
@@ -500,13 +502,14 @@ async function saveGuest(){
   const phone=document.getElementById('f-phone').value.trim();
   const notater=document.getElementById('f-notater').value.trim();
   if(!fornavn){toast('Fornavn må fylles ut');return;}
+  let error;
   if(editId){
-    await sb.from(TABLE).update({fornavn,etternavn,phone,notater}).eq('id',editId);
-    toast('Lagret');
+    ({error}=await sb.from(TABLE).update({fornavn,etternavn,phone,notater}).eq('id',editId));
   }else{
-    await sb.from(TABLE).insert({fornavn,etternavn,phone,notater});
-    toast('Gjest lagt til');
+    ({error}=await sb.from(TABLE).insert({fornavn,etternavn,phone,notater}));
   }
+  if(error){toast('Kunne ikke lagre: '+error.message);return;}
+  toast(editId?'Lagret':'Gjest lagt til');
   closeSheet();await loadGuests();
 }
 
@@ -538,10 +541,12 @@ function renderAttendanceList(){
 async function toggleAttendance(konsertId,checked){
   const gid=attendanceGuestId;if(!gid)return;
   if(checked){
-    await sb.from(DELTAKELSE_TABLE).insert({gjest_id:gid,konsert_id:konsertId});
+    const{error}=await sb.from(DELTAKELSE_TABLE).insert({gjest_id:gid,konsert_id:konsertId});
+    if(error){toast('Kunne ikke lagre: '+error.message);renderAttendanceList();return;}
     if(!attendance.some(a=>a.gjest_id===gid&&a.konsert_id===konsertId))attendance.push({gjest_id:gid,konsert_id:konsertId});
   }else{
-    await sb.from(DELTAKELSE_TABLE).delete().eq('gjest_id',gid).eq('konsert_id',konsertId);
+    const{error}=await sb.from(DELTAKELSE_TABLE).delete().eq('gjest_id',gid).eq('konsert_id',konsertId);
+    if(error){toast('Kunne ikke lagre: '+error.message);renderAttendanceList();return;}
     attendance=attendance.filter(a=>!(a.gjest_id===gid&&a.konsert_id===konsertId));
   }
   render();renderAttendanceList();
@@ -590,22 +595,35 @@ function startEditKonsert(id){
 }
 function closeKonsertEditSheet(){document.getElementById('konsert-edit-sheet').classList.remove('open');}
 async function saveKonsert(){
-  const navn=document.getElementById('k-navn').value.trim();
-  const dato=document.getElementById('k-dato').value||null;
+  const btn=document.querySelector('#konsert-edit-actions .primary');
+  const navnEl=document.getElementById('k-navn');
+  const navn=navnEl?navnEl.value.trim():'';
+  const datoEl=document.getElementById('k-dato');
+  const dato=(datoEl&&datoEl.value)?datoEl.value:null;
   if(!navn){toast('Navn må fylles ut');return;}
-  if(editKonsertId){
-    await sb.from(KONSERT_TABLE).update({navn,dato}).eq('id',editKonsertId);
-    toast('Lagret');
-  }else{
-    await sb.from(KONSERT_TABLE).insert({navn,dato});
-    toast('Konsert lagt til');
+  if(btn)btn.disabled=true;
+  try{
+    let error;
+    if(editKonsertId){
+      ({error}=await sb.from(KONSERT_TABLE).update({navn,dato}).eq('id',editKonsertId));
+    }else{
+      ({error}=await sb.from(KONSERT_TABLE).insert({navn,dato}));
+    }
+    if(error){toast('Kunne ikke lagre konsert: '+error.message);return;}
+    toast(editKonsertId?'Lagret':'Konsert lagt til');
+    closeKonsertEditSheet();
+    await loadConcerts();renderKonserter();
+  }catch(e){
+    toast('Noe gikk galt: '+(e&&e.message?e.message:'ukjent feil'));
+  }finally{
+    if(btn)btn.disabled=false;
   }
-  closeKonsertEditSheet();await loadConcerts();renderKonserter();
 }
 async function deleteKonsert(id){
   const k=concerts.find(x=>x.id===id);
   if(!confirm(`Slette konserten "${k?k.navn:''}"? Dette fjerner også oppmøteregistreringen for denne konserten.`))return;
-  await sb.from(KONSERT_TABLE).delete().eq('id',id);
+  const{error}=await sb.from(KONSERT_TABLE).delete().eq('id',id);
+  if(error){toast('Kunne ikke slette: '+error.message);return;}
   toast('Slettet');
   await loadConcerts();await loadAttendance();render();renderKonserter();
 }
