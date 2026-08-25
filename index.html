@@ -58,6 +58,21 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .reset-btns{display:flex;gap:6px;flex-wrap:wrap;}
 .btn-reset{padding:8px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;background:var(--muted);color:#fff;border:none;white-space:nowrap;}
 
+.sms-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.6rem 1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sms-bar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sms-count{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap;}
+.btn-primary-sm{padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.sms-check{width:20px;height:20px;flex-shrink:0;cursor:pointer;margin-right:2px;}
+
+.sms-queue-progress{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;}
+.sms-queue-guest{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1rem;text-align:center;margin-bottom:1rem;}
+.sms-queue-name{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--ink);margin-bottom:6px;}
+.sms-queue-phone{font-size:19px;font-weight:500;color:var(--accent-dark);margin-bottom:6px;}
+.sms-queue-note{font-size:13px;color:var(--muted);font-style:italic;}
+.sms-mark-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding:0.4rem 0.1rem;}
+.sms-done{text-align:center;padding:2rem 1rem;}
+.sms-done-icon{font-family:'Cormorant Garamond',serif;font-size:44px;color:var(--secondary-dark);margin-bottom:0.5rem;}
+
 .cards{padding:0.75rem 1rem 6rem;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:0.7rem;overflow:hidden;}
 .card.is-invitert{border-left:4px solid rgba(79,163,172,0.55);}
@@ -195,6 +210,16 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
       </div>
     </div>
 
+    <div class="sms-bar">
+      <button class="btn-sm" id="sms-toggle-btn" onclick="toggleSmsMode()">✉️ Send SMS</button>
+      <div class="sms-bar-actions" id="sms-bar-actions" style="display:none">
+        <span class="sms-count" id="sms-count">0 valgt</span>
+        <button class="btn-reset" onclick="selectAllVisible()">Velg alle synlige</button>
+        <button class="btn-reset" onclick="clearSmsSelection()">Tøm</button>
+        <button class="btn-primary-sm" onclick="startSmsQueue()">Start utsending →</button>
+      </div>
+    </div>
+
     <div class="cards" id="cards"></div>
     <div class="empty-state" id="empty-state" style="display:none">
       <div class="empty-icon">♪</div>
@@ -206,6 +231,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
       <table>
         <thead>
           <tr>
+            <th id="th-sms-check" style="display:none">Vgl</th>
             <th>Navn</th><th>Etternavn</th><th>Telefon</th><th>Notat</th>
             <th>Invitert sist</th><th>Var der sist</th><th>Konserter</th><th></th>
           </tr>
@@ -264,6 +290,24 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   </div>
 </div>
 
+<div class="sheet-bg" id="sms-queue-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">SMS-utsending</div>
+    <div class="sms-queue-progress" id="sms-queue-progress"></div>
+    <div id="sms-queue-body"></div>
+    <label class="sms-mark-row">
+      <input type="checkbox" class="cb" id="sms-mark-invited" checked>
+      <span>Merk automatisk som «Invitert sist» når jeg går videre</span>
+    </label>
+    <div class="sheet-actions" style="grid-template-columns:1fr 1fr 1fr;">
+      <button class="sheet-btn" onclick="closeSmsQueueSheet()">Avslutt</button>
+      <button class="sheet-btn" id="sms-open-btn" onclick="openSmsForQueueCurrent()">Åpne SMS</button>
+      <button class="sheet-btn primary" onclick="nextInSmsQueue()">Neste →</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -281,6 +325,7 @@ const SMS_TEKST='Konsert. Hilsen Ole Dørje.';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let guests=[],editId=null,activeFilter='alle';
 let concerts=[],attendance=[],currentView='gjester',attendanceGuestId=null,editKonsertId=null;
+let smsMode=false,smsSelected=new Set(),smsQueue=[],smsQueueIndex=0;
 
 function tryLogin(){
   const pw=document.getElementById('pw-input').value;
@@ -361,13 +406,18 @@ function smsHref(phone){
   return `sms:${encodeURIComponent(phone)}?&body=${encodeURIComponent(SMS_TEKST)}`;
 }
 
-function render(){
+function getFilteredGuests(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   let list=guests;
   if(activeFilter==='invitert')list=list.filter(g=>g.invitert_sist);
   else if(activeFilter==='var')list=list.filter(g=>g.var_sist);
   else if(activeFilter==='ikke')list=list.filter(g=>!g.invitert_sist);
   if(q)list=list.filter(g=>(g.fornavn||'').toLowerCase().includes(q)||(g.etternavn||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q)||(g.notater||'').toLowerCase().includes(q));
+  return list;
+}
+
+function render(){
+  const list=getFilteredGuests();
 
   document.getElementById('total-count').textContent=guests.length;
   const emptyEl=document.getElementById('empty-state');
@@ -379,6 +429,7 @@ function render(){
       const cls=[g.invitert_sist?'is-invitert':'',g.var_sist?'was-there':''].filter(Boolean).join(' ');
       return `<div class="card ${cls}" id="card-${g.id}">
         <div class="card-top">
+          ${smsMode?`<input type="checkbox" class="sms-check" ${smsSelected.has(g.id)?'checked':''} onclick="event.stopPropagation()" onchange="toggleSmsSelect('${g.id}',this.checked)">`:''}
           <div class="avatar">${ini(g.fornavn,g.etternavn)}</div>
           <div class="card-info">
             <div class="card-name">${esc(g.fornavn||'')} ${esc(g.etternavn||'')}</div>
@@ -402,6 +453,7 @@ function render(){
   document.getElementById('tbody').innerHTML=list.map(g=>{
     const cls=[g.invitert_sist?'is-invitert':'',g.var_sist?'was-there':''].filter(Boolean).join(' ');
     return `<tr class="${cls}">
+      ${smsMode?`<td class="cc"><input type="checkbox" class="cb" ${smsSelected.has(g.id)?'checked':''} onchange="toggleSmsSelect('${g.id}',this.checked)"></td>`:''}
       <td><div class="name-cell"><div class="avatar">${ini(g.fornavn,g.etternavn)}</div>${esc(g.fornavn||'')}</div></td>
       <td class="muted">${esc(g.etternavn||'—')}</td>
       <td>${g.phone?`<a class="phone-link" href="${smsHref(g.phone)}">${esc(g.phone)}</a>`:'<span class="muted">—</span>'}</td>
@@ -626,6 +678,84 @@ async function deleteKonsert(id){
   if(error){toast('Kunne ikke slette: '+error.message);return;}
   toast('Slettet');
   await loadConcerts();await loadAttendance();render();renderKonserter();
+}
+
+function toggleSmsMode(){
+  smsMode=!smsMode;
+  smsSelected.clear();
+  document.getElementById('sms-toggle-btn').textContent=smsMode?'✕ Avbryt valg':'✉️ Send SMS';
+  document.getElementById('sms-bar-actions').style.display=smsMode?'flex':'none';
+  document.getElementById('th-sms-check').style.display=smsMode?'':'none';
+  updateSmsCount();
+  render();
+}
+function toggleSmsSelect(id,checked){
+  if(checked)smsSelected.add(id);else smsSelected.delete(id);
+  updateSmsCount();
+}
+function updateSmsCount(){
+  const el=document.getElementById('sms-count');
+  if(el)el.textContent=smsSelected.size+' valgt';
+}
+function selectAllVisible(){
+  const list=getFilteredGuests();
+  list.forEach(g=>{if(g.phone)smsSelected.add(g.id);});
+  updateSmsCount();
+  render();
+}
+function clearSmsSelection(){
+  smsSelected.clear();
+  updateSmsCount();
+  render();
+}
+
+function startSmsQueue(){
+  const list=guests.filter(g=>smsSelected.has(g.id)&&g.phone);
+  if(!list.length){toast('Ingen gjester med telefonnummer valgt');return;}
+  smsQueue=list;
+  smsQueueIndex=0;
+  document.getElementById('sms-queue-sheet').classList.add('open');
+  renderSmsQueueStep();
+}
+function renderSmsQueueStep(){
+  const progressEl=document.getElementById('sms-queue-progress');
+  const bodyEl=document.getElementById('sms-queue-body');
+  const openBtn=document.getElementById('sms-open-btn');
+  if(smsQueueIndex>=smsQueue.length){
+    progressEl.textContent='Ferdig';
+    bodyEl.innerHTML=`<div class="sms-done"><div class="sms-done-icon">♪</div><h3>Ferdig!</h3><p style="color:var(--muted);font-size:14px;margin-top:6px;">Alle valgte gjester er gått gjennom.</p></div>`;
+    openBtn.style.display='none';
+    return;
+  }
+  openBtn.style.display='';
+  const g=smsQueue[smsQueueIndex];
+  progressEl.textContent=`Gjest ${smsQueueIndex+1} av ${smsQueue.length}`;
+  bodyEl.innerHTML=`<div class="sms-queue-guest">
+    <div class="sms-queue-name">${esc(g.fornavn||'')} ${esc(g.etternavn||'')}</div>
+    <div class="sms-queue-phone">📱 ${esc(g.phone||'')}</div>
+    ${g.notater?`<div class="sms-queue-note">${esc(g.notater)}</div>`:''}
+  </div>`;
+}
+function openSmsForQueueCurrent(){
+  const g=smsQueue[smsQueueIndex];
+  if(!g)return;
+  window.location.href=smsHref(g.phone);
+}
+async function nextInSmsQueue(){
+  const g=smsQueue[smsQueueIndex];
+  if(g){
+    const markEl=document.getElementById('sms-mark-invited');
+    if(markEl&&markEl.checked&&!g.invitert_sist){
+      await toggleFlagDirect(g.id,'invitert_sist',true);
+      render();
+    }
+  }
+  smsQueueIndex++;
+  renderSmsQueueStep();
+}
+function closeSmsQueueSheet(){
+  document.getElementById('sms-queue-sheet').classList.remove('open');
+  smsQueue=[];smsQueueIndex=0;
 }
 
 function toast(msg){
