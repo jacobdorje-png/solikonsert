@@ -62,6 +62,8 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .sms-bar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .sms-count{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap;}
 .btn-primary-sm{padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-auto-sms{padding:8px 14px;border-radius:8px;background:var(--secondary-dark);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.btn-auto-sms:disabled{opacity:0.6;cursor:default;}
 .sms-check{width:20px;height:20px;flex-shrink:0;cursor:pointer;margin-right:2px;}
 
 .sms-queue-progress{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;}
@@ -217,6 +219,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
         <button class="btn-reset" onclick="selectAllVisible()">Velg alle synlige</button>
         <button class="btn-reset" onclick="clearSmsSelection()">Tøm</button>
         <button class="btn-primary-sm" onclick="startSmsQueue()">Start utsending →</button>
+        <button class="btn-auto-sms" id="sms-auto-btn" onclick="sendAutoSms()">⚡ Send automatisk</button>
       </div>
     </div>
 
@@ -756,6 +759,39 @@ async function nextInSmsQueue(){
 function closeSmsQueueSheet(){
   document.getElementById('sms-queue-sheet').classList.remove('open');
   smsQueue=[];smsQueueIndex=0;
+}
+
+async function sendAutoSms(){
+  const list=guests.filter(g=>smsSelected.has(g.id)&&g.phone);
+  if(!list.length){toast('Ingen gjester med telefonnummer valgt');return;}
+  if(!confirm(`Sende automatisk SMS til ${list.length} gjester via ClickSend, fra ditt verifiserte nummer?\n\nDette koster penger per melding og kan ikke angres.`))return;
+  const btn=document.getElementById('sms-auto-btn');
+  if(btn)btn.disabled=true;
+  toast(`Sender til ${list.length} gjester…`);
+  try{
+    const{data,error}=await sb.functions.invoke('send-sms',{body:{
+      recipients:list.map(g=>({id:g.id,phone:g.phone})),
+      message:SMS_TEKST
+    }});
+    if(error){toast('Noe gikk galt: '+(error.message||'ukjent feil'));return;}
+    if(data&&data.error){toast('Feil: '+data.error);return;}
+    const okIds=(data.results||[]).filter(r=>r.status==='ok'&&r.id).map(r=>r.id);
+    if(okIds.length){
+      const{error:updErr}=await sb.from(TABLE).update({invitert_sist:true,invitert_dato:new Date().toISOString().slice(0,10)}).in('id',okIds);
+      if(updErr)toast('Sendt, men kunne ikke oppdatere «Invitert sist»: '+updErr.message);
+      await loadGuests();
+    }
+    toast(`${data.sent} av ${data.total} sendt`);
+    smsMode=false;smsSelected.clear();
+    document.getElementById('sms-toggle-btn').textContent='✉️ Send SMS';
+    document.getElementById('sms-bar-actions').style.display='none';
+    document.getElementById('th-sms-check').style.display='none';
+    render();
+  }catch(e){
+    toast('Noe gikk galt: '+(e&&e.message?e.message:'ukjent feil'));
+  }finally{
+    if(btn)btn.disabled=false;
+  }
 }
 
 function toast(msg){
