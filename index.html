@@ -225,7 +225,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
       <button class="btn-sm" id="sms-toggle-btn" onclick="toggleSmsMode()">✉️ Send SMS</button>
       <button class="btn-sm" onclick="openSmsTextSheet()">✏️ Meldingstekst</button>
       <div class="sms-bar-actions" id="sms-bar-actions" style="display:none">
-        <select class="sms-konsert-select" id="sms-konsert-select"></select>
+        <button class="btn-sm" id="sms-konsert-btn" onclick="openKonsertSelectSheet()">🎵 Velg konsert(er)</button>
         <span class="sms-count" id="sms-count">0 valgt</span>
         <button class="btn-reset" onclick="selectAllVisible()">Velg alle synlige</button>
         <button class="btn-reset" onclick="clearSmsSelection()">Tøm</button>
@@ -318,6 +318,17 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   </div>
 </div>
 
+<div class="sheet-bg" id="konsert-select-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Velg konsert(er)</div>
+    <div id="konsert-select-list"></div>
+    <div class="sheet-actions" style="grid-template-columns:1fr;margin-top:0.5rem;">
+      <button class="sheet-btn primary" onclick="closeKonsertSelectSheet()">Ferdig</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet-bg" id="sms-text-sheet">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -371,6 +382,7 @@ const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let guests=[],editId=null;
 let concerts=[],attendance=[],currentView='oversikt',attendanceGuestId=null,editKonsertId=null,konsertDetailId=null;
 let smsMode=false,smsSelected=new Set(),smsQueue=[],smsQueueIndex=0;
+let smsKonsertSelected=new Set();
 let appSettings={sms_tekst:'Konsert. Hilsen Ole Dørje.'};
 
 function tryLogin(){
@@ -422,8 +434,10 @@ async function loadConcerts(){
     renderKonserter();
     render();
     if(currentView==='arkiv')renderArkiv();
-    const barOpen=document.getElementById('sms-bar-actions');
-    if(barOpen&&barOpen.style.display!=='none')populateKonsertSelect();
+    const activeIds=new Set(concerts.filter(k=>!k.arkivert).map(k=>k.id));
+    Array.from(smsKonsertSelected).forEach(id=>{if(!activeIds.has(id))smsKonsertSelected.delete(id);});
+    updateKonsertSelectBtn();
+    if(document.getElementById('konsert-select-sheet').classList.contains('open'))renderKonsertSelectList();
   }
 }
 async function loadAttendance(){
@@ -817,20 +831,39 @@ function toggleSmsMode(){
   document.getElementById('sms-toggle-btn').textContent=smsMode?'✕ Avbryt valg':'✉️ Send SMS';
   document.getElementById('sms-bar-actions').style.display=smsMode?'flex':'none';
   document.getElementById('th-sms-check').style.display=smsMode?'':'none';
-  if(smsMode)populateKonsertSelect();
+  if(smsMode)updateKonsertSelectBtn();
   updateSmsCount();
   render();
 }
-function populateKonsertSelect(){
-  const sel=document.getElementById('sms-konsert-select');if(!sel)return;
-  const prev=sel.value;
-  const active=activeConcertsSorted();
-  sel.innerHTML='<option value="">— Velg konsert —</option>'+active.map(k=>`<option value="${k.id}">${esc(k.navn)}${k.dato?' · '+fmtDate(k.dato):''}</option>`).join('');
-  if(prev&&active.some(k=>k.id===prev))sel.value=prev;
+function openKonsertSelectSheet(){
+  renderKonsertSelectList();
+  document.getElementById('konsert-select-sheet').classList.add('open');
 }
-function selectedKonsertId(){
-  const sel=document.getElementById('sms-konsert-select');
-  return sel?sel.value:'';
+function closeKonsertSelectSheet(){
+  document.getElementById('konsert-select-sheet').classList.remove('open');
+  updateKonsertSelectBtn();
+}
+function renderKonsertSelectList(){
+  const wrap=document.getElementById('konsert-select-list');if(!wrap)return;
+  const active=activeConcertsSorted();
+  if(!active.length){wrap.innerHTML='<p class="konsert-empty">Ingen aktive konserter. Opprett en konsert først.</p>';return;}
+  wrap.innerHTML=active.map(k=>`<label class="sms-mark-row" style="cursor:pointer;">
+    <input type="checkbox" class="cb" ${smsKonsertSelected.has(k.id)?'checked':''} onchange="toggleKonsertSelect('${k.id}',this.checked)">
+    <span>${esc(k.navn)}${k.dato?' · '+fmtDate(k.dato):''}</span>
+  </label>`).join('');
+}
+function toggleKonsertSelect(id,checked){
+  if(checked)smsKonsertSelected.add(id);else smsKonsertSelected.delete(id);
+  updateKonsertSelectBtn();
+}
+function updateKonsertSelectBtn(){
+  const btn=document.getElementById('sms-konsert-btn');if(!btn)return;
+  const n=selectedKonsertIds().length;
+  btn.textContent=n?`🎵 ${n} konsert${n>1?'er':''} valgt`:'🎵 Velg konsert(er)';
+}
+function selectedKonsertIds(){
+  const activeIds=new Set(activeConcertsSorted().map(k=>k.id));
+  return Array.from(smsKonsertSelected).filter(id=>activeIds.has(id));
 }
 function toggleSmsSelect(id,checked){
   if(checked)smsSelected.add(id);else smsSelected.delete(id);
@@ -869,8 +902,8 @@ async function saveSmsTekst(){
 }
 
 function startSmsQueue(){
-  const kid=selectedKonsertId();
-  if(!kid){toast('Velg hvilken konsert SMS-en gjelder for først');return;}
+  const kids=selectedKonsertIds();
+  if(!kids.length){toast('Velg minst én konsert SMS-en gjelder for først');return;}
   const list=guests.filter(g=>smsSelected.has(g.id)&&g.phone);
   if(!list.length){toast('Ingen gjester med telefonnummer valgt');return;}
   smsQueue=list;
@@ -906,9 +939,9 @@ async function nextInSmsQueue(){
   const g=smsQueue[smsQueueIndex];
   if(g){
     const markEl=document.getElementById('sms-mark-invited');
-    const kid=selectedKonsertId();
-    if(markEl&&markEl.checked&&kid){
-      await setStatus(g.id,kid,'invitert');
+    const kids=selectedKonsertIds();
+    if(markEl&&markEl.checked&&kids.length){
+      for(const kid of kids){await setStatus(g.id,kid,'invitert');}
       render();renderKonserter();
     }
   }
@@ -921,8 +954,8 @@ function closeSmsQueueSheet(){
 }
 
 async function sendAutoSms(){
-  const kid=selectedKonsertId();
-  if(!kid){toast('Velg hvilken konsert SMS-en gjelder for først');return;}
+  const kids=selectedKonsertIds();
+  if(!kids.length){toast('Velg minst én konsert SMS-en gjelder for først');return;}
   const list=guests.filter(g=>smsSelected.has(g.id)&&g.phone);
   if(!list.length){toast('Ingen gjester med telefonnummer valgt');return;}
   if(!confirm(`Sende automatisk SMS til ${list.length} gjester via ClickSend, fra ditt verifiserte nummer?\n\nDette koster penger per melding og kan ikke angres.`))return;
@@ -948,7 +981,9 @@ async function sendAutoSms(){
     if(data&&data.error){toast('Feil: '+data.error,7000);return;}
     const okIds=(data.results||[]).filter(r=>r.status==='ok'&&r.id).map(r=>r.id);
     if(okIds.length){
-      const{error:updErr}=await sb.from(DELTAKELSE_TABLE).upsert(okIds.map(id=>({gjest_id:id,konsert_id:kid,status:'invitert'})),{onConflict:'gjest_id,konsert_id'});
+      const rows=[];
+      okIds.forEach(id=>{kids.forEach(kid=>rows.push({gjest_id:id,konsert_id:kid,status:'invitert'}));});
+      const{error:updErr}=await sb.from(DELTAKELSE_TABLE).upsert(rows,{onConflict:'gjest_id,konsert_id'});
       if(updErr)toast('Sendt, men kunne ikke oppdatere status: '+updErr.message);
       await loadAttendance();
     }
