@@ -14,8 +14,6 @@
   --accent:#4fa3ac;--accent-dark:#357c85;--accent-light:#dcf0f1;
   --secondary:#8fbf7a;--secondary-dark:#5f8e4d;--secondary-light:#e6f4de;
   --danger:#e0644f;--success:#5f9d54;
-  --ci:var(--accent-light);--cv:var(--secondary-light);
-  --ti:var(--accent-dark);--tv:var(--secondary-dark);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent;}
@@ -44,27 +42,40 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .main-tabs .tab{flex:1;text-align:center;padding:13px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;user-select:none;}
 .main-tabs .tab.active{color:var(--accent-dark);border-bottom-color:var(--accent);}
 
-.searchbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;gap:0.5rem;align-items:center;position:sticky;top:41px;z-index:10;}
+.konsert-section{padding:1rem 1rem 0;}
+.konsert-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;}
+.konsert-section-title{font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--accent-dark);margin:0;}
+.konsert-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
+.konsert-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;cursor:pointer;}
+.konsert-strip .konsert-card{flex:0 0 230px;}
+.konsert-list-page .konsert-card{margin-bottom:0.7rem;}
+.konsert-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.konsert-navn{font-size:16px;font-weight:500;}
+.konsert-dato{font-size:13px;color:var(--muted);margin-top:3px;}
+.konsert-empty{color:var(--muted);font-size:14px;padding:0.25rem 0 0.5rem;}
+.konsert-stats{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.kd-stat{font-size:11px;padding:3px 7px;border-radius:10px;background:var(--surface-soft);color:var(--muted);white-space:nowrap;}
+.kd-stat.s-invitert{background:var(--accent-light);color:var(--accent-dark);}
+.kd-stat.s-kom{background:var(--secondary-light);color:var(--secondary-dark);}
+.kd-stat.s-kunne_ikke{background:rgba(224,100,79,0.15);color:var(--danger);}
+.kd-stat.s-ikke_svart{background:rgba(126,143,148,0.15);color:var(--muted);}
+.kd-stats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:0.75rem;}
+
+.searchbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;gap:0.5rem;align-items:center;margin-top:1rem;}
 .search-wrap{flex:1;position:relative;}
 .search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:0.3;pointer-events:none;}
 .search-wrap input{width:100%;padding:11px 11px 11px 36px;border:1px solid var(--border-strong);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:16px;background:var(--bg);color:var(--ink);outline:none;-webkit-appearance:none;}
 .search-wrap input:focus{border-color:var(--accent);}
 .btn-sm{padding:10px 13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink);display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
 
-.filter-bar{background:var(--surface-soft);border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;}
-.filter-chips{display:flex;gap:6px;flex-wrap:wrap;}
-.chip{padding:8px 14px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;user-select:none;}
-.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-.reset-btns{display:flex;gap:6px;flex-wrap:wrap;}
-.btn-reset{padding:8px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;background:var(--muted);color:#fff;border:none;white-space:nowrap;}
-
 .sms-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0.6rem 1rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.sms-bar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sms-bar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;}
 .sms-count{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap;}
 .btn-primary-sm{padding:8px 14px;border-radius:8px;background:var(--accent);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .btn-auto-sms{padding:8px 14px;border-radius:8px;background:var(--secondary-dark);color:#fff;border:none;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .btn-auto-sms:disabled{opacity:0.6;cursor:default;}
 .sms-check{width:20px;height:20px;flex-shrink:0;cursor:pointer;margin-right:2px;}
+.sms-konsert-select{padding:9px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);max-width:220px;}
 
 .sms-queue-progress{font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.75rem;}
 .sms-queue-guest{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1rem;text-align:center;margin-bottom:1rem;}
@@ -77,8 +88,6 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 
 .cards{padding:0.75rem 1rem 6rem;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:0.7rem;overflow:hidden;}
-.card.is-invitert{border-left:4px solid rgba(79,163,172,0.55);}
-.card.was-there{background:var(--cv);}
 .card-top{display:flex;align-items:center;gap:10px;padding:13px 14px 6px;}
 .avatar{width:38px;height:38px;border-radius:50%;background:var(--accent-light);border:1px solid rgba(79,163,172,0.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;color:var(--accent-dark);flex-shrink:0;}
 .card-info{flex:1;min-width:0;}
@@ -90,13 +99,15 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .card-note{padding:2px 14px 10px;font-size:13px;color:var(--muted);cursor:pointer;line-height:1.4;}
 .card-note.empty-txt{color:#bbb;font-style:italic;}
 .card-note textarea{width:100%;padding:8px 10px;border:1.5px solid var(--accent);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--surface);color:var(--ink);outline:none;resize:vertical;min-height:60px;}
+.card-badges{display:flex;flex-wrap:wrap;gap:5px;padding:0 14px 8px;}
+.kbadge{display:inline-flex;font-size:11px;padding:4px 8px;border-radius:10px;background:var(--surface-soft);color:var(--muted);}
+.kbadge.s-invitert{background:var(--accent-light);color:var(--accent-dark);}
+.kbadge.s-kom{background:var(--secondary-light);color:var(--secondary-dark);}
+.kbadge.s-kunne_ikke{background:rgba(224,100,79,0.15);color:var(--danger);}
+.kbadge.s-ikke_svart{background:rgba(126,143,148,0.15);color:var(--muted);}
+.kbadge.more{background:transparent;color:var(--muted);font-style:italic;}
 .card-checks{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 13px;border-top:1px solid var(--border);}
 .cpill{display:flex;align-items:center;gap:5px;padding:8px 13px;border-radius:20px;border:1px solid var(--border-strong);background:var(--surface);font-size:14px;cursor:pointer;user-select:none;}
-.cpill.ci{background:var(--ci);border-color:rgba(79,163,172,0.4);color:var(--ti);}
-.cpill.cv{background:var(--cv);border-color:rgba(143,191,122,0.5);color:var(--tv);}
-.cpill-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;flex-shrink:0;}
-.cpill.ci .cpill-dot,.cpill.cv .cpill-dot{background:currentColor;}
-.cpill-date{font-size:11px;opacity:0.7;}
 
 .empty-state{text-align:center;padding:3.5rem 2rem;color:var(--muted);}
 .empty-icon{font-family:'Cormorant Garamond',serif;font-size:48px;color:rgba(79,163,172,0.3);margin-bottom:0.75rem;}
@@ -104,15 +115,19 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .empty-state p{font-size:14px;}
 
 .konsert-list{padding:1.25rem 1rem 6rem;}
-.konsert-section-title{font-family:'Cormorant Garamond',serif;font-size:21px;color:var(--accent-dark);margin:0 0 0.7rem;}
-.konsert-section-title:not(:first-child){margin-top:1.75rem;}
-.konsert-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:0.7rem;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.konsert-navn{font-size:16px;font-weight:500;}
-.konsert-dato{font-size:13px;color:var(--muted);margin-top:3px;}
-.konsert-empty{color:var(--muted);font-size:14px;padding:0.25rem 0 0.5rem;}
-.attendance-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--border-strong);border-radius:10px;cursor:pointer;margin-bottom:8px;}
-.attendance-row span.an{flex:1;font-size:14px;}
-.attendance-row span.ad{font-size:12px;color:var(--muted);}
+.konsert-list .konsert-card{margin-bottom:0.7rem;}
+
+.attendance-row-wrap{border:1px solid var(--border-strong);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.attendance-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;}
+.attendance-row-head .an{font-size:14px;font-weight:500;}
+.attendance-row-head .ad{font-size:12px;color:var(--muted);white-space:nowrap;}
+.status-group{display:flex;gap:6px;flex-wrap:wrap;}
+.status-btn{padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface);font-size:12px;cursor:pointer;color:var(--ink);font-family:'DM Sans',sans-serif;}
+.status-btn.active.s-invitert{background:var(--accent);color:#fff;border-color:var(--accent);}
+.status-btn.active.s-kom{background:var(--secondary-dark);color:#fff;border-color:var(--secondary-dark);}
+.status-btn.active.s-kunne_ikke{background:var(--danger);color:#fff;border-color:var(--danger);}
+.status-btn.active.s-ikke_svart{background:var(--muted);color:#fff;border-color:var(--muted);}
+.status-btn.clear{color:var(--danger);border-color:transparent;background:transparent;padding:6px 8px;}
 
 .fab{position:fixed;right:1.25rem;bottom:1.25rem;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 4px 14px rgba(47,58,61,0.2);font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:20;}
 
@@ -131,7 +146,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
 .sheet-btn{padding:14px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;cursor:pointer;border:1px solid var(--border-strong);background:var(--surface);color:var(--ink);text-align:center;}
 .sheet-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);}
 
-.toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--accent-dark);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:100;transition:transform 0.25s;}
+.toast{position:fixed;bottom:1.25rem;left:50%;transform:translateX(-50%) translateY(100px);background:var(--accent-dark);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:100;transition:transform 0.25s;max-width:88vw;text-align:center;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
 /* Desktop table */
@@ -143,21 +158,20 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   thead th{text-align:left;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding:12px 14px;border-bottom:1px solid var(--border);background:var(--surface-soft);}
   tbody td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
-  tbody tr.is-invitert td:first-child{box-shadow:inset 4px 0 0 rgba(79,163,172,0.55);}
-  tbody tr.was-there{background:var(--cv);}
   .name-cell{display:flex;align-items:center;gap:10px;}
   .phone-link{color:var(--accent-dark);text-decoration:none;font-weight:500;}
   .muted{color:var(--muted);}
-  .kj{cursor:pointer;max-width:260px;}
+  .kj{cursor:pointer;max-width:320px;}
   .cc{text-align:center;}
   .cb{width:18px;height:18px;cursor:pointer;}
   .row-acts{display:flex;gap:4px;}
   .icon-btn-sm{width:28px;height:28px;border-radius:7px;border:none;background:rgba(0,0,0,0.05);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);}
   .icon-btn-sm.del svg{stroke:#c0392b;}
-  .searchbar,.filter-bar{padding-left:2.5rem;padding-right:2.5rem;}
+  .searchbar{padding-left:2.5rem;padding-right:2.5rem;}
   header{padding-left:2.5rem;padding-right:2.5rem;}
   .fab{right:2.5rem;bottom:2.5rem;}
-  .konsert-list{padding:1.5rem 2.5rem 3rem;max-width:760px;}
+  .konsert-list{padding:1.5rem 2.5rem 3rem;max-width:860px;}
+  .konsert-section{padding-left:2.5rem;padding-right:2.5rem;}
 }
 </style>
 </head>
@@ -187,11 +201,19 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   </header>
 
   <div class="main-tabs">
-    <div class="tab active" id="tab-gjester" onclick="switchView('gjester')">Gjester</div>
-    <div class="tab" id="tab-konserter" onclick="switchView('konserter')">Konserter</div>
+    <div class="tab active" id="tab-oversikt" onclick="switchView('oversikt')">Oversikt</div>
+    <div class="tab" id="tab-arkiv" onclick="switchView('arkiv')">Arkiv</div>
   </div>
 
-  <div id="view-gjester">
+  <div id="view-oversikt">
+    <div class="konsert-section">
+      <div class="konsert-section-head">
+        <div class="konsert-section-title">Konserter</div>
+        <button class="btn-sm" onclick="openAddKonsert()">+ Ny konsert</button>
+      </div>
+      <div class="konsert-strip" id="konsert-list"></div>
+    </div>
+
     <div class="searchbar">
       <div class="search-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -199,22 +221,11 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
       </div>
     </div>
 
-    <div class="filter-bar">
-      <div class="filter-chips">
-        <div class="chip active" id="chip-alle" onclick="setFilter('alle')">Alle</div>
-        <div class="chip" id="chip-invitert" onclick="setFilter('invitert')">Invitert sist</div>
-        <div class="chip" id="chip-var" onclick="setFilter('var')">Var der sist</div>
-        <div class="chip" id="chip-ikke" onclick="setFilter('ikke')">Ikke invitert</div>
-      </div>
-      <div class="reset-btns">
-        <button class="btn-reset" onclick="nullstillInvitert()">Nullstill invitert</button>
-        <button class="btn-reset" onclick="nullstillVar()">Nullstill oppmøte</button>
-      </div>
-    </div>
-
     <div class="sms-bar">
       <button class="btn-sm" id="sms-toggle-btn" onclick="toggleSmsMode()">✉️ Send SMS</button>
+      <button class="btn-sm" onclick="openSmsTextSheet()">✏️ Meldingstekst</button>
       <div class="sms-bar-actions" id="sms-bar-actions" style="display:none">
+        <select class="sms-konsert-select" id="sms-konsert-select"></select>
         <span class="sms-count" id="sms-count">0 valgt</span>
         <button class="btn-reset" onclick="selectAllVisible()">Velg alle synlige</button>
         <button class="btn-reset" onclick="clearSmsSelection()">Tøm</button>
@@ -236,7 +247,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
           <tr>
             <th id="th-sms-check" style="display:none">Vgl</th>
             <th>Navn</th><th>Etternavn</th><th>Telefon</th><th>Notat</th>
-            <th>Invitert sist</th><th>Var der sist</th><th>Konserter</th><th></th>
+            <th>Konserter</th><th></th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -244,12 +255,11 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
     </div>
   </div>
 
-  <div id="view-konserter" style="display:none">
-    <div class="konsert-list" id="konsert-list"></div>
+  <div id="view-arkiv" style="display:none">
+    <div class="konsert-list konsert-list-page" id="arkiv-list"></div>
   </div>
 
   <button class="fab" id="fab-gjester" onclick="openAdd()" title="Legg til gjest">+</button>
-  <button class="fab" id="fab-konsert" onclick="openAddKonsert()" title="Legg til konsert" style="display:none">+</button>
 </div>
 
 <div class="sheet-bg" id="edit-sheet">
@@ -293,6 +303,33 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
   </div>
 </div>
 
+<div class="sheet-bg" id="konsert-detail-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="kd-title">Konsert</div>
+    <div class="kd-stats" id="kd-stats"></div>
+    <div class="field"><input type="text" id="kd-search" placeholder="Søk gjest…" oninput="renderKonsertDetailList()"></div>
+    <div id="kd-list"></div>
+    <div class="sheet-actions" id="kd-actions" style="grid-template-columns:1fr 1fr 1fr;">
+      <button class="sheet-btn" onclick="closeKonsertDetail()">Lukk</button>
+      <button class="sheet-btn" onclick="startEditKonsert(konsertDetailId)">Rediger</button>
+      <button class="sheet-btn primary" id="kd-archive-btn" onclick="toggleArchiveFromDetail()">Arkiver</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-bg" id="sms-text-sheet">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Meldingstekst</div>
+    <div class="field"><label>SMS-tekst</label><textarea id="sms-tekst-input" placeholder="Skriv meldingen som skal sendes…" style="min-height:120px;"></textarea></div>
+    <div class="sheet-actions">
+      <button class="sheet-btn" onclick="closeSmsTextSheet()">Avbryt</button>
+      <button class="sheet-btn primary" onclick="saveSmsTekst()">Lagre</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet-bg" id="sms-queue-sheet">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -301,7 +338,7 @@ header{background:var(--accent);padding:1.25rem 1.25rem 1rem;display:flex;align-
     <div id="sms-queue-body"></div>
     <label class="sms-mark-row">
       <input type="checkbox" class="cb" id="sms-mark-invited" checked>
-      <span>Merk automatisk som «Invitert sist» når jeg går videre</span>
+      <span>Merk automatisk som «Invitert» for valgt konsert når jeg går videre</span>
     </label>
     <div class="sheet-actions" style="grid-template-columns:1fr 1fr 1fr;">
       <button class="sheet-btn" onclick="closeSmsQueueSheet()">Avslutt</button>
@@ -320,15 +357,21 @@ const ACCESS_PASSWORD='sbk';
 const TABLE='konsert_gjester';
 const KONSERT_TABLE='konsert_arrangementer';
 const DELTAKELSE_TABLE='konsert_deltakelse';
+const SETTINGS_TABLE='konsert_innstillinger';
 
-// Denne meldingen sendes ferdig utfylt når du trykker på et telefonnummer.
-// Be Claude endre denne teksten når dere har en ny invitasjon å sende ut.
-const SMS_TEKST='Konsert. Hilsen Ole Dørje.';
+const STATUS_KEYS=['invitert','kom','kunne_ikke','ikke_svart'];
+const STATUS_META={
+  invitert:{label:'Invitert',short:'Invitert'},
+  kom:{label:'Kom på konsert',short:'Kom'},
+  kunne_ikke:{label:'Kunne ikke komme',short:'Kunne ikke'},
+  ikke_svart:{label:'Svarte ikke',short:'Ikke svart'}
+};
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let guests=[],editId=null,activeFilter='alle';
-let concerts=[],attendance=[],currentView='gjester',attendanceGuestId=null,editKonsertId=null;
+let guests=[],editId=null;
+let concerts=[],attendance=[],currentView='oversikt',attendanceGuestId=null,editKonsertId=null,konsertDetailId=null;
 let smsMode=false,smsSelected=new Set(),smsQueue=[],smsQueueIndex=0;
+let appSettings={sms_tekst:'Konsert. Hilsen Ole Dørje.'};
 
 function tryLogin(){
   const pw=document.getElementById('pw-input').value;
@@ -336,7 +379,7 @@ function tryLogin(){
     sessionStorage.setItem('solikonsert-auth','1');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').style.display='block';
-    loadGuests();loadConcerts();loadAttendance();subscribeRealtime();
+    loadGuests();loadConcerts();loadAttendance();loadSettings();subscribeRealtime();
   }else{
     const err=document.getElementById('login-error');
     err.textContent='Feil passord – prøv igjen.';
@@ -347,18 +390,17 @@ function tryLogin(){
 if(sessionStorage.getItem('solikonsert-auth')==='1'){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').style.display='block';
-  loadGuests();loadConcerts();loadAttendance();subscribeRealtime();
+  loadGuests();loadConcerts();loadAttendance();loadSettings();subscribeRealtime();
 }
 
 function switchView(v){
   currentView=v;
-  document.getElementById('view-gjester').style.display=v==='gjester'?'':'none';
-  document.getElementById('view-konserter').style.display=v==='konserter'?'':'none';
-  document.getElementById('fab-gjester').style.display=v==='gjester'?'flex':'none';
-  document.getElementById('fab-konsert').style.display=v==='konserter'?'flex':'none';
-  document.getElementById('tab-gjester').classList.toggle('active',v==='gjester');
-  document.getElementById('tab-konserter').classList.toggle('active',v==='konserter');
-  if(v==='konserter')renderKonserter();
+  document.getElementById('view-oversikt').style.display=v==='oversikt'?'':'none';
+  document.getElementById('view-arkiv').style.display=v==='arkiv'?'':'none';
+  document.getElementById('fab-gjester').style.display=v==='oversikt'?'flex':'none';
+  document.getElementById('tab-oversikt').classList.toggle('active',v==='oversikt');
+  document.getElementById('tab-arkiv').classList.toggle('active',v==='arkiv');
+  if(v==='arkiv')renderArkiv();
 }
 
 async function loadGuests(){
@@ -374,8 +416,15 @@ async function loadGuests(){
   if(!hadError){guests=all;render();window.scrollTo({top:scrollY});}
 }
 async function loadConcerts(){
-  const{data,error}=await sb.from(KONSERT_TABLE).select('*').order('dato',{ascending:false});
-  if(!error){concerts=data||[];if(currentView==='konserter')renderKonserter();}
+  const{data,error}=await sb.from(KONSERT_TABLE).select('*').order('created_at',{ascending:false});
+  if(!error){
+    concerts=data||[];
+    renderKonserter();
+    render();
+    if(currentView==='arkiv')renderArkiv();
+    const barOpen=document.getElementById('sms-bar-actions');
+    if(barOpen&&barOpen.style.display!=='none')populateKonsertSelect();
+  }
 }
 async function loadAttendance(){
   const PAGE=1000;let all=[],from=0,keepGoing=true;
@@ -386,37 +435,60 @@ async function loadAttendance(){
     if(!data||data.length<PAGE)keepGoing=false;else from+=PAGE;
   }
   attendance=all;
+  render();renderKonserter();
+  if(currentView==='arkiv')renderArkiv();
+}
+async function loadSettings(){
+  const{data,error}=await sb.from(SETTINGS_TABLE).select('*').eq('id',1).maybeSingle();
+  if(!error&&data)appSettings=data;
 }
 function attendedIds(gid){return attendance.filter(a=>a.gjest_id===gid).map(a=>a.konsert_id);}
-function attendanceCount(kid){return attendance.filter(a=>a.konsert_id===kid).length;}
+function statusFor(gid,kid){const a=attendance.find(x=>x.gjest_id===gid&&x.konsert_id===kid);return a?a.status:null;}
+function statusCounts(kid){
+  const c={invitert:0,kom:0,kunne_ikke:0,ikke_svart:0};
+  attendance.filter(a=>a.konsert_id===kid).forEach(a=>{if(c[a.status]!==undefined)c[a.status]++;});
+  return c;
+}
+function activeConcertsSorted(){
+  return concerts.filter(k=>!k.arkivert).slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+}
+function archivedConcertsSorted(){
+  return concerts.filter(k=>k.arkivert).slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+}
 
 function subscribeRealtime(){
   sb.channel('konsert_all')
     .on('postgres_changes',{event:'*',schema:'public',table:TABLE},()=>loadGuests())
     .on('postgres_changes',{event:'*',schema:'public',table:KONSERT_TABLE},()=>loadConcerts())
-    .on('postgres_changes',{event:'*',schema:'public',table:DELTAKELSE_TABLE},async()=>{await loadAttendance();render();if(currentView==='konserter')renderKonserter();if(document.getElementById('attendance-sheet').classList.contains('open'))renderAttendanceList();})
+    .on('postgres_changes',{event:'*',schema:'public',table:DELTAKELSE_TABLE},async()=>{
+      await loadAttendance();render();renderKonserter();
+      if(currentView==='arkiv')renderArkiv();
+      if(document.getElementById('attendance-sheet').classList.contains('open'))renderAttendanceList();
+      if(document.getElementById('konsert-detail-sheet').classList.contains('open')){renderKonsertDetailStats();renderKonsertDetailList();}
+    })
+    .on('postgres_changes',{event:'*',schema:'public',table:SETTINGS_TABLE},()=>loadSettings())
     .subscribe();
 }
 
-function setFilter(f){
-  activeFilter=f;
-  ['alle','invitert','var','ikke'].forEach(x=>document.getElementById('chip-'+x).classList.remove('active'));
-  document.getElementById('chip-'+f).classList.add('active');
-  render();
-}
-
 function smsHref(phone){
-  return `sms:${encodeURIComponent(phone)}?&body=${encodeURIComponent(SMS_TEKST)}`;
+  return `sms:${encodeURIComponent(phone)}?&body=${encodeURIComponent(appSettings.sms_tekst||'')}`;
 }
 
 function getFilteredGuests(){
   const q=(document.getElementById('search').value||'').toLowerCase();
   let list=guests;
-  if(activeFilter==='invitert')list=list.filter(g=>g.invitert_sist);
-  else if(activeFilter==='var')list=list.filter(g=>g.var_sist);
-  else if(activeFilter==='ikke')list=list.filter(g=>!g.invitert_sist);
   if(q)list=list.filter(g=>(g.fornavn||'').toLowerCase().includes(q)||(g.etternavn||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q)||(g.notater||'').toLowerCase().includes(q));
   return list;
+}
+
+function guestBadges(gid){
+  const rows=attendance.filter(a=>a.gjest_id===gid);
+  if(!rows.length)return'';
+  const withConcert=rows.map(a=>({...a,k:concerts.find(c=>c.id===a.konsert_id)})).filter(x=>x.k);
+  withConcert.sort((a,b)=>new Date(b.k.created_at||0)-new Date(a.k.created_at||0));
+  const shown=withConcert.slice(0,2);
+  const rest=withConcert.length-shown.length;
+  return shown.map(x=>`<span class="kbadge s-${x.status}">${esc(x.k.navn)} · ${STATUS_META[x.status]?STATUS_META[x.status].short:x.status}</span>`).join('')+(rest>0?`<span class="kbadge more">+${rest}</span>`:'');
 }
 
 function render(){
@@ -429,8 +501,7 @@ function render(){
   else{
     emptyEl.style.display='none';
     cardsEl.innerHTML=list.map(g=>{
-      const cls=[g.invitert_sist?'is-invitert':'',g.var_sist?'was-there':''].filter(Boolean).join(' ');
-      return `<div class="card ${cls}" id="card-${g.id}">
+      return `<div class="card" id="card-${g.id}">
         <div class="card-top">
           ${smsMode?`<input type="checkbox" class="sms-check" ${smsSelected.has(g.id)?'checked':''} onclick="event.stopPropagation()" onchange="toggleSmsSelect('${g.id}',this.checked)">`:''}
           <div class="avatar">${ini(g.fornavn,g.etternavn)}</div>
@@ -444,9 +515,8 @@ function render(){
           </div>
         </div>
         <div class="card-note ${g.notater?'':'empty-txt'}" id="nt-${g.id}" onclick="editNote('${g.id}')">${esc(g.notater||'Trykk for å legge inn notat…')}</div>
+        <div class="card-badges">${guestBadges(g.id)}</div>
         <div class="card-checks">
-          <div class="cpill ${g.invitert_sist?'ci':''}" onclick="toggleFlag('${g.id}','invitert_sist')"><div class="cpill-dot"></div>Invitert sist${g.invitert_sist&&g.invitert_dato?` <span class="cpill-date">(${fmtDate(g.invitert_dato)})</span>`:''}</div>
-          <div class="cpill ${g.var_sist?'cv':''}" onclick="toggleFlag('${g.id}','var_sist')"><div class="cpill-dot"></div>Var der sist</div>
           <div class="cpill" onclick="openAttendanceSheet('${g.id}')">🎵 Konserter (${attendedIds(g.id).length})</div>
         </div>
       </div>`;
@@ -454,16 +524,13 @@ function render(){
   }
 
   document.getElementById('tbody').innerHTML=list.map(g=>{
-    const cls=[g.invitert_sist?'is-invitert':'',g.var_sist?'was-there':''].filter(Boolean).join(' ');
-    return `<tr class="${cls}">
+    return `<tr>
       ${smsMode?`<td class="cc"><input type="checkbox" class="cb" ${smsSelected.has(g.id)?'checked':''} onchange="toggleSmsSelect('${g.id}',this.checked)"></td>`:''}
       <td><div class="name-cell"><div class="avatar">${ini(g.fornavn,g.etternavn)}</div>${esc(g.fornavn||'')}</div></td>
       <td class="muted">${esc(g.etternavn||'—')}</td>
       <td>${g.phone?`<a class="phone-link" href="${smsHref(g.phone)}">${esc(g.phone)}</a>`:'<span class="muted">—</span>'}</td>
       <td class="kj" onclick="startEdit('${g.id}')">${esc(g.notater||'—')}</td>
-      <td class="cc"><input type="checkbox" class="cb" ${g.invitert_sist?'checked':''} onchange="toggleFlagDirect('${g.id}','invitert_sist',this.checked)"></td>
-      <td class="cc"><input type="checkbox" class="cb" ${g.var_sist?'checked':''} onchange="toggleFlagDirect('${g.id}','var_sist',this.checked)"></td>
-      <td class="cc"><button class="btn-reset" onclick="openAttendanceSheet('${g.id}')">🎵 ${attendedIds(g.id).length}</button></td>
+      <td class="kj" onclick="openAttendanceSheet('${g.id}')">${guestBadges(g.id)||'<span class="muted">—</span>'}</td>
       <td><div class="row-acts">
         <button class="icon-btn-sm" onclick="startEdit('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="icon-btn-sm del" onclick="deleteGuest('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
@@ -479,24 +546,6 @@ function fmtDateLong(d){
   const months=['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
   const p=d.split('-');if(p.length!==3)return d;
   return `${parseInt(p[2],10)}. ${months[parseInt(p[1],10)-1]} ${p[0]}`;
-}
-
-async function toggleFlag(id,col){
-  const g=guests.find(x=>x.id===id);if(!g)return;
-  const newVal=!g[col];g[col]=newVal;
-  const upd={[col]:newVal};
-  if(col==='invitert_sist')upd.invitert_dato=newVal?new Date().toISOString().slice(0,10):null;
-  if(col==='invitert_sist')g.invitert_dato=upd.invitert_dato;
-  const{error}=await sb.from(TABLE).update(upd).eq('id',id);
-  if(error){toast('Kunne ikke lagre: '+error.message);g[col]=!newVal;}
-  render();
-}
-async function toggleFlagDirect(id,col,val){
-  const upd={[col]:val};
-  if(col==='invitert_sist')upd.invitert_dato=val?new Date().toISOString().slice(0,10):null;
-  const{error}=await sb.from(TABLE).update(upd).eq('id',id);
-  if(error){toast('Kunne ikke lagre: '+error.message);render();return;}
-  const g=guests.find(x=>x.id===id);if(g){g[col]=val;if(col==='invitert_sist')g.invitert_dato=upd.invitert_dato;}
 }
 
 async function editNote(id){
@@ -518,17 +567,6 @@ async function deleteGuest(id){
   if(!confirm(`Slette ${g?g.fornavn+' '+(g.etternavn||''):'denne gjesten'}?`))return;
   await sb.from(TABLE).delete().eq('id',id);
   toast('Slettet');await loadGuests();
-}
-
-async function nullstillInvitert(){
-  if(!confirm('Nullstille "Invitert sist" for alle gjester?'))return;
-  await sb.from(TABLE).update({invitert_sist:false,invitert_dato:null}).neq('id','00000000-0000-0000-0000-000000000000');
-  toast('Nullstilt');await loadGuests();
-}
-async function nullstillVar(){
-  if(!confirm('Nullstille "Var der sist" for alle gjester?'))return;
-  await sb.from(TABLE).update({var_sist:false}).neq('id','00000000-0000-0000-0000-000000000000');
-  toast('Nullstilt');await loadGuests();
 }
 
 function openAdd(){
@@ -568,6 +606,20 @@ async function saveGuest(){
   closeSheet();await loadGuests();
 }
 
+async function setStatus(gid,kid,status){
+  if(!status){
+    const{error}=await sb.from(DELTAKELSE_TABLE).delete().eq('gjest_id',gid).eq('konsert_id',kid);
+    if(error){toast('Kunne ikke lagre: '+error.message);return false;}
+    attendance=attendance.filter(a=>!(a.gjest_id===gid&&a.konsert_id===kid));
+  }else{
+    const{error}=await sb.from(DELTAKELSE_TABLE).upsert({gjest_id:gid,konsert_id:kid,status},{onConflict:'gjest_id,konsert_id'});
+    if(error){toast('Kunne ikke lagre: '+error.message);return false;}
+    const idx=attendance.findIndex(a=>a.gjest_id===gid&&a.konsert_id===kid);
+    if(idx>=0)attendance[idx].status=status;else attendance.push({gjest_id:gid,konsert_id:kid,status});
+  }
+  return true;
+}
+
 function openAttendanceSheet(gid){
   attendanceGuestId=gid;
   const g=guests.find(x=>x.id===gid);
@@ -582,55 +634,53 @@ function closeAttendanceSheet(){
 function renderAttendanceList(){
   const list=document.getElementById('attendance-list');
   if(!concerts.length){
-    list.innerHTML='<p class="konsert-empty">Ingen konserter lagt inn ennå. Legg til under fanen «Konserter».</p>';
+    list.innerHTML='<p class="konsert-empty">Ingen konserter lagt inn ennå. Trykk «+ Ny konsert» på oversikten for å legge til en.</p>';
     return;
   }
-  const mine=new Set(attendedIds(attendanceGuestId));
-  list.innerHTML=concerts.map(k=>`
-    <label class="attendance-row">
-      <input type="checkbox" class="cb" ${mine.has(k.id)?'checked':''} onchange="toggleAttendance('${k.id}',this.checked)">
-      <span class="an">${esc(k.navn)}</span>
-      <span class="ad">${k.dato?fmtDate(k.dato):''}</span>
-    </label>`).join('');
+  const gid=attendanceGuestId;
+  const sorted=concerts.slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  list.innerHTML=sorted.map(k=>{
+    const cur=statusFor(gid,k.id);
+    return `<div class="attendance-row-wrap">
+      <div class="attendance-row-head"><span class="an">${esc(k.navn)}${k.arkivert?' (arkivert)':''}</span><span class="ad">${k.dato?fmtDate(k.dato):''}</span></div>
+      <div class="status-group">
+        ${STATUS_KEYS.map(sk=>`<button class="status-btn ${cur===sk?'active s-'+sk:''}" onclick="pickStatus('${k.id}','${sk}')">${STATUS_META[sk].short}</button>`).join('')}
+        ${cur?`<button class="status-btn clear" onclick="pickStatus('${k.id}',null)">✕</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
-async function toggleAttendance(konsertId,checked){
+async function pickStatus(kid,status){
   const gid=attendanceGuestId;if(!gid)return;
-  if(checked){
-    const{error}=await sb.from(DELTAKELSE_TABLE).insert({gjest_id:gid,konsert_id:konsertId});
-    if(error){toast('Kunne ikke lagre: '+error.message);renderAttendanceList();return;}
-    if(!attendance.some(a=>a.gjest_id===gid&&a.konsert_id===konsertId))attendance.push({gjest_id:gid,konsert_id:konsertId});
-  }else{
-    const{error}=await sb.from(DELTAKELSE_TABLE).delete().eq('gjest_id',gid).eq('konsert_id',konsertId);
-    if(error){toast('Kunne ikke lagre: '+error.message);renderAttendanceList();return;}
-    attendance=attendance.filter(a=>!(a.gjest_id===gid&&a.konsert_id===konsertId));
-  }
-  render();renderAttendanceList();
+  const ok=await setStatus(gid,kid,status);
+  if(ok){render();renderAttendanceList();renderKonserter();renderArkiv();if(konsertDetailId===kid){renderKonsertDetailStats();renderKonsertDetailList();}}
 }
 
-function renderKonserter(){
-  const wrap=document.getElementById('konsert-list');if(!wrap)return;
-  const todayStr=new Date().toISOString().slice(0,10);
-  const withCounts=concerts.map(k=>({...k,count:attendanceCount(k.id)}));
-  const kommende=withCounts.filter(k=>k.dato&&k.dato>=todayStr).sort((a,b)=>a.dato<b.dato?-1:1);
-  const tidligere=withCounts.filter(k=>!k.dato||k.dato<todayStr).sort((a,b)=>(b.dato||'').localeCompare(a.dato||''));
-  function card(k){
-    return `<div class="konsert-card">
+function konsertCard(k){
+  const c=statusCounts(k.id);
+  return `<div class="konsert-card" onclick="openKonsertDetail('${k.id}')">
+    <div class="konsert-card-top">
       <div>
         <div class="konsert-navn">${esc(k.navn)}</div>
-        <div class="konsert-dato">${k.dato?fmtDateLong(k.dato):'Dato ikke satt'} · ${k.count} gjest${k.count===1?'':'er'}</div>
+        <div class="konsert-dato">${k.dato?fmtDateLong(k.dato):'Dato ikke satt'}</div>
       </div>
-      <div class="card-btns">
+      <div class="card-btns" onclick="event.stopPropagation()">
         <button class="icon-btn" onclick="startEditKonsert('${k.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="icon-btn" onclick="deleteKonsert('${k.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
       </div>
-    </div>`;
-  }
-  wrap.innerHTML=`
-    <div class="konsert-section-title">Kommende konserter</div>
-    ${kommende.length?kommende.map(card).join(''):'<p class="konsert-empty">Ingen kommende konserter lagt inn ennå.</p>'}
-    <div class="konsert-section-title">Tidligere konserter</div>
-    ${tidligere.length?tidligere.map(card).join(''):'<p class="konsert-empty">Ingen tidligere konserter lagt inn ennå.</p>'}
-  `;
+    </div>
+    <div class="konsert-stats">${STATUS_KEYS.map(sk=>`<span class="kd-stat s-${sk}">${STATUS_META[sk].short} ${c[sk]}</span>`).join('')}</div>
+  </div>`;
+}
+function renderKonserter(){
+  const wrap=document.getElementById('konsert-list');if(!wrap)return;
+  const active=activeConcertsSorted();
+  wrap.innerHTML=active.length?active.map(konsertCard).join(''):'<p class="konsert-empty">Ingen konserter ennå. Trykk «+ Ny konsert» for å legge til.</p>';
+}
+function renderArkiv(){
+  const wrap=document.getElementById('arkiv-list');if(!wrap)return;
+  const archived=archivedConcertsSorted();
+  wrap.innerHTML=archived.length?archived.map(konsertCard).join(''):'<p class="konsert-empty">Ingen arkiverte konserter ennå.</p>';
 }
 
 function openAddKonsert(){
@@ -642,6 +692,7 @@ function openAddKonsert(){
 }
 function startEditKonsert(id){
   const k=concerts.find(x=>x.id===id);if(!k)return;
+  if(document.getElementById('konsert-detail-sheet').classList.contains('open'))closeKonsertDetail();
   editKonsertId=id;
   document.getElementById('konsert-edit-title').textContent='Rediger konsert';
   document.getElementById('k-navn').value=k.navn||'';
@@ -667,7 +718,11 @@ async function saveKonsert(){
     if(error){toast('Kunne ikke lagre konsert: '+error.message);return;}
     toast(editKonsertId?'Lagret':'Konsert lagt til');
     closeKonsertEditSheet();
-    await loadConcerts();renderKonserter();
+    await loadConcerts();
+    if(konsertDetailId===editKonsertId){
+      const k=concerts.find(x=>x.id===editKonsertId);
+      if(k)document.getElementById('kd-title').textContent=k.navn+(k.dato?' · '+fmtDateLong(k.dato):'');
+    }
   }catch(e){
     toast('Noe gikk galt: '+(e&&e.message?e.message:'ukjent feil'));
   }finally{
@@ -676,11 +731,64 @@ async function saveKonsert(){
 }
 async function deleteKonsert(id){
   const k=concerts.find(x=>x.id===id);
-  if(!confirm(`Slette konserten "${k?k.navn:''}"? Dette fjerner også oppmøteregistreringen for denne konserten.`))return;
+  if(!confirm(`Slette konserten "${k?k.navn:''}"? Dette fjerner også status-registreringen for denne konserten.`))return;
   const{error}=await sb.from(KONSERT_TABLE).delete().eq('id',id);
   if(error){toast('Kunne ikke slette: '+error.message);return;}
   toast('Slettet');
-  await loadConcerts();await loadAttendance();render();renderKonserter();
+  if(konsertDetailId===id)closeKonsertDetail();
+  await loadConcerts();await loadAttendance();render();renderKonserter();renderArkiv();
+}
+
+function openKonsertDetail(kid){
+  konsertDetailId=kid;
+  const k=concerts.find(x=>x.id===kid);if(!k)return;
+  document.getElementById('kd-title').textContent=k.navn+(k.dato?' · '+fmtDateLong(k.dato):'');
+  document.getElementById('kd-search').value='';
+  document.getElementById('kd-archive-btn').textContent=k.arkivert?'Gjenåpne':'Arkiver';
+  renderKonsertDetailStats();
+  renderKonsertDetailList();
+  document.getElementById('konsert-detail-sheet').classList.add('open');
+}
+function closeKonsertDetail(){
+  document.getElementById('konsert-detail-sheet').classList.remove('open');
+  konsertDetailId=null;
+}
+function renderKonsertDetailStats(){
+  if(!konsertDetailId)return;
+  const c=statusCounts(konsertDetailId);
+  document.getElementById('kd-stats').innerHTML=STATUS_KEYS.map(sk=>`<span class="kd-stat s-${sk}">${STATUS_META[sk].short}: ${c[sk]}</span>`).join('');
+}
+function renderKonsertDetailList(){
+  if(!konsertDetailId)return;
+  const q=(document.getElementById('kd-search').value||'').toLowerCase();
+  const kid=konsertDetailId;
+  let list=guests;
+  if(q)list=list.filter(g=>(g.fornavn||'').toLowerCase().includes(q)||(g.etternavn||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q));
+  document.getElementById('kd-list').innerHTML=list.length?list.map(g=>{
+    const cur=statusFor(g.id,kid);
+    return `<div class="attendance-row-wrap">
+      <div class="attendance-row-head"><span class="an">${esc(g.fornavn||'')} ${esc(g.etternavn||'')}</span><span class="ad">${g.phone?esc(g.phone):''}</span></div>
+      <div class="status-group">
+        ${STATUS_KEYS.map(sk=>`<button class="status-btn ${cur===sk?'active s-'+sk:''}" onclick="setKdStatus('${g.id}','${sk}')">${STATUS_META[sk].short}</button>`).join('')}
+        ${cur?`<button class="status-btn clear" onclick="setKdStatus('${g.id}',null)">✕</button>`:''}
+      </div>
+    </div>`;
+  }).join(''):'<p class="konsert-empty">Ingen gjester funnet.</p>';
+}
+async function setKdStatus(gid,status){
+  if(!konsertDetailId)return;
+  const ok=await setStatus(gid,konsertDetailId,status);
+  if(ok){renderKonsertDetailStats();renderKonsertDetailList();render();renderKonserter();renderArkiv();if(attendanceGuestId===gid)renderAttendanceList();}
+}
+async function toggleArchiveFromDetail(){
+  const k=concerts.find(x=>x.id===konsertDetailId);if(!k)return;
+  const newVal=!k.arkivert;
+  const{error}=await sb.from(KONSERT_TABLE).update({arkivert:newVal}).eq('id',k.id);
+  if(error){toast('Kunne ikke lagre: '+error.message);return;}
+  k.arkivert=newVal;
+  toast(newVal?'Konsert arkivert':'Konsert gjenåpnet');
+  document.getElementById('kd-archive-btn').textContent=newVal?'Gjenåpne':'Arkiver';
+  renderKonserter();renderArkiv();
 }
 
 function toggleSmsMode(){
@@ -689,8 +797,20 @@ function toggleSmsMode(){
   document.getElementById('sms-toggle-btn').textContent=smsMode?'✕ Avbryt valg':'✉️ Send SMS';
   document.getElementById('sms-bar-actions').style.display=smsMode?'flex':'none';
   document.getElementById('th-sms-check').style.display=smsMode?'':'none';
+  if(smsMode)populateKonsertSelect();
   updateSmsCount();
   render();
+}
+function populateKonsertSelect(){
+  const sel=document.getElementById('sms-konsert-select');if(!sel)return;
+  const prev=sel.value;
+  const active=activeConcertsSorted();
+  sel.innerHTML='<option value="">— Velg konsert —</option>'+active.map(k=>`<option value="${k.id}">${esc(k.navn)}${k.dato?' · '+fmtDate(k.dato):''}</option>`).join('');
+  if(prev&&active.some(k=>k.id===prev))sel.value=prev;
+}
+function selectedKonsertId(){
+  const sel=document.getElementById('sms-konsert-select');
+  return sel?sel.value:'';
 }
 function toggleSmsSelect(id,checked){
   if(checked)smsSelected.add(id);else smsSelected.delete(id);
@@ -712,7 +832,25 @@ function clearSmsSelection(){
   render();
 }
 
+function openSmsTextSheet(){
+  document.getElementById('sms-tekst-input').value=appSettings.sms_tekst||'';
+  document.getElementById('sms-text-sheet').classList.add('open');
+}
+function closeSmsTextSheet(){document.getElementById('sms-text-sheet').classList.remove('open');}
+async function saveSmsTekst(){
+  const val=document.getElementById('sms-tekst-input').value.trim();
+  if(!val){toast('Meldingen kan ikke være tom');return;}
+  const{error}=await sb.from(SETTINGS_TABLE).upsert({id:1,sms_tekst:val,updated_at:new Date().toISOString()});
+  if(error){toast('Kunne ikke lagre: '+error.message);return;}
+  appSettings.sms_tekst=val;
+  toast('Meldingstekst lagret');
+  closeSmsTextSheet();
+  render();
+}
+
 function startSmsQueue(){
+  const kid=selectedKonsertId();
+  if(!kid){toast('Velg hvilken konsert SMS-en gjelder for først');return;}
   const list=guests.filter(g=>smsSelected.has(g.id)&&g.phone);
   if(!list.length){toast('Ingen gjester med telefonnummer valgt');return;}
   smsQueue=list;
@@ -748,9 +886,10 @@ async function nextInSmsQueue(){
   const g=smsQueue[smsQueueIndex];
   if(g){
     const markEl=document.getElementById('sms-mark-invited');
-    if(markEl&&markEl.checked&&!g.invitert_sist){
-      await toggleFlagDirect(g.id,'invitert_sist',true);
-      render();
+    const kid=selectedKonsertId();
+    if(markEl&&markEl.checked&&kid){
+      await setStatus(g.id,kid,'invitert');
+      render();renderKonserter();
     }
   }
   smsQueueIndex++;
@@ -762,6 +901,8 @@ function closeSmsQueueSheet(){
 }
 
 async function sendAutoSms(){
+  const kid=selectedKonsertId();
+  if(!kid){toast('Velg hvilken konsert SMS-en gjelder for først');return;}
   const list=guests.filter(g=>smsSelected.has(g.id)&&g.phone);
   if(!list.length){toast('Ingen gjester med telefonnummer valgt');return;}
   if(!confirm(`Sende automatisk SMS til ${list.length} gjester via ClickSend, fra ditt verifiserte nummer?\n\nDette koster penger per melding og kan ikke angres.`))return;
@@ -771,7 +912,7 @@ async function sendAutoSms(){
   try{
     const{data,error}=await sb.functions.invoke('send-sms',{body:{
       recipients:list.map(g=>({id:g.id,phone:g.phone})),
-      message:SMS_TEKST
+      message:appSettings.sms_tekst
     }});
     if(error){
       let detail=error.message||'ukjent feil';
@@ -787,16 +928,16 @@ async function sendAutoSms(){
     if(data&&data.error){toast('Feil: '+data.error,7000);return;}
     const okIds=(data.results||[]).filter(r=>r.status==='ok'&&r.id).map(r=>r.id);
     if(okIds.length){
-      const{error:updErr}=await sb.from(TABLE).update({invitert_sist:true,invitert_dato:new Date().toISOString().slice(0,10)}).in('id',okIds);
-      if(updErr)toast('Sendt, men kunne ikke oppdatere «Invitert sist»: '+updErr.message);
-      await loadGuests();
+      const{error:updErr}=await sb.from(DELTAKELSE_TABLE).upsert(okIds.map(id=>({gjest_id:id,konsert_id:kid,status:'invitert'})),{onConflict:'gjest_id,konsert_id'});
+      if(updErr)toast('Sendt, men kunne ikke oppdatere status: '+updErr.message);
+      await loadAttendance();
     }
     toast(`${data.sent} av ${data.total} sendt`);
     smsMode=false;smsSelected.clear();
     document.getElementById('sms-toggle-btn').textContent='✉️ Send SMS';
     document.getElementById('sms-bar-actions').style.display='none';
     document.getElementById('th-sms-check').style.display='none';
-    render();
+    render();renderKonserter();
   }catch(e){
     toast('Noe gikk galt: '+(e&&e.message?e.message:'ukjent feil'));
   }finally{
