@@ -442,7 +442,25 @@ async function loadSettings(){
   const{data,error}=await sb.from(SETTINGS_TABLE).select('*').eq('id',1).maybeSingle();
   if(!error&&data)appSettings=data;
 }
-function attendedIds(gid){return attendance.filter(a=>a.gjest_id===gid).map(a=>a.konsert_id);}
+function attendanceByGuestMap(){
+  const m=new Map();
+  for(const a of attendance){
+    if(!m.has(a.gjest_id))m.set(a.gjest_id,[]);
+    m.get(a.gjest_id).push(a);
+  }
+  return m;
+}
+function statusMapForKonsert(kid){
+  const m=new Map();
+  for(const a of attendance){
+    if(a.konsert_id===kid)m.set(a.gjest_id,a.status);
+  }
+  return m;
+}
+function attendedIds(gid,byGuestMap){
+  const rows=byGuestMap?(byGuestMap.get(gid)||[]):attendance.filter(a=>a.gjest_id===gid);
+  return rows.map(a=>a.konsert_id);
+}
 function statusFor(gid,kid){const a=attendance.find(x=>x.gjest_id===gid&&x.konsert_id===kid);return a?a.status:null;}
 function statusCounts(kid){
   const c={invitert:0,kom:0,kunne_ikke:0,ikke_svart:0};
@@ -481,8 +499,8 @@ function getFilteredGuests(){
   return list;
 }
 
-function guestBadges(gid){
-  const rows=attendance.filter(a=>a.gjest_id===gid);
+function guestBadges(gid,byGuestMap){
+  const rows=byGuestMap?(byGuestMap.get(gid)||[]):attendance.filter(a=>a.gjest_id===gid);
   if(!rows.length)return'';
   const withConcert=rows.map(a=>({...a,k:concerts.find(c=>c.id===a.konsert_id)})).filter(x=>x.k);
   withConcert.sort((a,b)=>new Date(b.k.created_at||0)-new Date(a.k.created_at||0));
@@ -493,6 +511,7 @@ function guestBadges(gid){
 
 function render(){
   const list=getFilteredGuests();
+  const byGuest=attendanceByGuestMap();
 
   document.getElementById('total-count').textContent=guests.length;
   const emptyEl=document.getElementById('empty-state');
@@ -515,9 +534,9 @@ function render(){
           </div>
         </div>
         <div class="card-note ${g.notater?'':'empty-txt'}" id="nt-${g.id}" onclick="editNote('${g.id}')">${esc(g.notater||'Trykk for å legge inn notat…')}</div>
-        <div class="card-badges">${guestBadges(g.id)}</div>
+        <div class="card-badges">${guestBadges(g.id,byGuest)}</div>
         <div class="card-checks">
-          <div class="cpill" onclick="openAttendanceSheet('${g.id}')">🎵 Konserter (${attendedIds(g.id).length})</div>
+          <div class="cpill" onclick="openAttendanceSheet('${g.id}')">🎵 Konserter (${attendedIds(g.id,byGuest).length})</div>
         </div>
       </div>`;
     }).join('');
@@ -530,7 +549,7 @@ function render(){
       <td class="muted">${esc(g.etternavn||'—')}</td>
       <td>${g.phone?`<a class="phone-link" href="${smsHref(g.phone)}">${esc(g.phone)}</a>`:'<span class="muted">—</span>'}</td>
       <td class="kj" onclick="startEdit('${g.id}')">${esc(g.notater||'—')}</td>
-      <td class="kj" onclick="openAttendanceSheet('${g.id}')">${guestBadges(g.id)||'<span class="muted">—</span>'}</td>
+      <td class="kj" onclick="openAttendanceSheet('${g.id}')">${guestBadges(g.id,byGuest)||'<span class="muted">—</span>'}</td>
       <td><div class="row-acts">
         <button class="icon-btn-sm" onclick="startEdit('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
         <button class="icon-btn-sm del" onclick="deleteGuest('${g.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
@@ -764,8 +783,9 @@ function renderKonsertDetailList(){
   const kid=konsertDetailId;
   let list=guests;
   if(q)list=list.filter(g=>(g.fornavn||'').toLowerCase().includes(q)||(g.etternavn||'').toLowerCase().includes(q)||(g.phone||'').toLowerCase().includes(q));
+  const statusMap=statusMapForKonsert(kid);
   document.getElementById('kd-list').innerHTML=list.length?list.map(g=>{
-    const cur=statusFor(g.id,kid);
+    const cur=statusMap.get(g.id)||null;
     return `<div class="attendance-row-wrap">
       <div class="attendance-row-head"><span class="an">${esc(g.fornavn||'')} ${esc(g.etternavn||'')}</span><span class="ad">${g.phone?esc(g.phone):''}</span></div>
       <div class="status-group">
