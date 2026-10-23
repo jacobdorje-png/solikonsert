@@ -454,7 +454,7 @@ async function loadAttendance(){
 }
 async function loadSettings(){
   const{data,error}=await sb.from(SETTINGS_TABLE).select('*').eq('id',1).maybeSingle();
-  if(!error&&data)appSettings=data;
+  if(!error&&data){appSettings=data;render();}
 }
 function attendanceByGuestMap(){
   const m=new Map();
