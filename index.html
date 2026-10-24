@@ -560,7 +560,7 @@ function render(){
   }
 
   document.getElementById('tbody').innerHTML=list.map(g=>{
-    return `<tr>
+    return `<tr id="row-${g.id}">
       ${smsMode?`<td class="cc"><input type="checkbox" class="cb" ${smsSelected.has(g.id)?'checked':''} onchange="toggleSmsSelect('${g.id}',this.checked)"></td>`:''}
       <td><div class="name-cell"><div class="avatar">${ini(g.fornavn,g.etternavn)}</div>${esc(g.fornavn||'')}</div></td>
       <td class="muted">${esc(g.etternavn||'—')}</td>
@@ -605,14 +605,21 @@ async function deleteGuest(id){
   toast('Slettet');await loadGuests();
 }
 
+function setSmsSentUI(id,checked){
+  document.querySelectorAll(`#card-${id} .sms-sent-label, #row-${id} .sms-sent-label`).forEach(label=>{
+    label.classList.toggle('sent',checked);
+    const input=label.querySelector('input');
+    if(input)input.checked=checked;
+  });
+}
 async function toggleSmsSendt(id,checked){
   const g=guests.find(x=>x.id===id);
   if(g)g.sms_sendt=checked;
-  render();
+  setSmsSentUI(id,checked);
   const{error}=await sb.from(TABLE).update({sms_sendt:checked}).eq('id',id);
   if(error){
     if(g)g.sms_sendt=!checked;
-    render();
+    setSmsSentUI(id,!checked);
     toast('Kunne ikke lagre: '+error.message);
   }
 }
